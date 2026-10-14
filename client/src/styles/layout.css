@@ -51,10 +51,6 @@
   margin-top: 2rem;
 }
 
-.sidebar-nav-bottom {
-  margin-top: auto;
-}
-
 .sidebar-nav-item {
   display: grid;
   grid-template-columns: 1.35rem minmax(0, 1fr);
@@ -215,8 +211,7 @@
     padding: 0;
   }
 
-  .sidebar-nav,
-  .sidebar-nav-bottom {
+  .sidebar-nav {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;

@@ -6,7 +6,7 @@ import {
   updateTask as updateTaskRequest,
 } from "../api/tasksApi";
 import type { NewTaskInput, Task } from "../types";
-import { getSafeDueDate } from "../utils/date";
+import { getDefaultDueDate } from "../utils/date";
 
 function splitTasks(tasks: Task[]) {
   return {
@@ -18,7 +18,7 @@ function splitTasks(tasks: Task[]) {
 function buildTaskInput(taskInput: NewTaskInput) {
   const nextTask: NewTaskInput = {
     title: taskInput.title,
-    dueDate: getSafeDueDate(taskInput.dueDate),
+    dueDate: getDefaultDueDate(taskInput.dueDate),
   };
 
   if (taskInput.description) {

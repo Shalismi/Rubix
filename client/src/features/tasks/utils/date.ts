@@ -28,14 +28,6 @@ export function formatSectionDate(dateValue: string) {
   }).format(date);
 }
 
-export function formatSectionWeekday(dateValue: string) {
-  const date = new Date(`${dateValue}T00:00:00`);
-
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-  }).format(date);
-}
-
 export function formatCalendarDay(dateValue: string) {
   const date = new Date(`${dateValue}T00:00:00`);
 
@@ -67,12 +59,6 @@ export function compareDateValues(firstDate: string, secondDate: string) {
   );
 }
 
-export function getSafeDueDate(dateValue?: string) {
-  const todayDateValue = getTodayDateValue();
-
-  if (!dateValue || compareDateValues(dateValue, todayDateValue) < 0) {
-    return todayDateValue;
-  }
-
-  return dateValue;
+export function getDefaultDueDate(dateValue?: string) {
+  return dateValue || getTodayDateValue();
 }

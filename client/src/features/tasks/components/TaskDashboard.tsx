@@ -1,9 +1,48 @@
-import type { MouseEvent } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { CalendarPanel } from "./CalendarPanel";
 import { TaskForm } from "./TaskForm";
 import { TaskSection } from "./TaskSection";
 import type { NewTaskInput, Task } from "../types";
 import { getActiveTaskGroups } from "../utils/taskGroups";
+
+type CollapsibleTaskSection = "today" | "upcoming" | "completed";
+type OpenTaskSections = Record<CollapsibleTaskSection, boolean>;
+
+const TASK_SECTION_STORAGE_KEY = "rubix.task-sections";
+const DEFAULT_OPEN_SECTIONS: OpenTaskSections = {
+  today: true,
+  upcoming: true,
+  completed: true,
+};
+
+function getSavedOpenSections(): OpenTaskSections {
+  try {
+    const savedValue = window.localStorage.getItem(TASK_SECTION_STORAGE_KEY);
+
+    if (!savedValue) {
+      return { ...DEFAULT_OPEN_SECTIONS };
+    }
+
+    const savedSections = JSON.parse(savedValue) as Partial<OpenTaskSections>;
+
+    return {
+      today:
+        typeof savedSections.today === "boolean"
+          ? savedSections.today
+          : DEFAULT_OPEN_SECTIONS.today,
+      upcoming:
+        typeof savedSections.upcoming === "boolean"
+          ? savedSections.upcoming
+          : DEFAULT_OPEN_SECTIONS.upcoming,
+      completed:
+        typeof savedSections.completed === "boolean"
+          ? savedSections.completed
+          : DEFAULT_OPEN_SECTIONS.completed,
+    };
+  } catch {
+    return { ...DEFAULT_OPEN_SECTIONS };
+  }
+}
 
 type TaskDashboardProps = {
   activeTasks: Task[];
@@ -25,6 +64,21 @@ type TaskDashboardProps = {
   onUpdateTask: (taskId: number, task: NewTaskInput) => void;
 };
 
+function filterTasks(tasks: Task[], searchQuery: string) {
+  if (!searchQuery) {
+    return tasks;
+  }
+
+  return tasks.filter((task) => {
+    const searchableTaskText = [task.title, task.description, task.dueDate]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchableTaskText.includes(searchQuery);
+  });
+}
+
 export function TaskDashboard({
   activeTasks,
   completedTasks,
@@ -44,7 +98,46 @@ export function TaskDashboard({
   onToggleTaskCompleted,
   onUpdateTask,
 }: TaskDashboardProps) {
-  const activeTaskGroups = getActiveTaskGroups(activeTasks);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openSections, setOpenSections] =
+    useState<OpenTaskSections>(getSavedOpenSections);
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const isSearching = normalizedSearchQuery.length > 0;
+  const filteredActiveTasks = useMemo(
+    () => filterTasks(activeTasks, normalizedSearchQuery),
+    [activeTasks, normalizedSearchQuery],
+  );
+  const filteredCompletedTasks = useMemo(
+    () => filterTasks(completedTasks, normalizedSearchQuery),
+    [completedTasks, normalizedSearchQuery],
+  );
+  const activeTaskGroups = useMemo(
+    () => getActiveTaskGroups(filteredActiveTasks),
+    [filteredActiveTasks],
+  );
+  const visibleActiveTaskGroups = isSearching
+    ? activeTaskGroups.filter((taskGroup) => taskGroup.tasks.length > 0)
+    : activeTaskGroups;
+  const hasSearchResults =
+    filteredActiveTasks.length + filteredCompletedTasks.length > 0;
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        TASK_SECTION_STORAGE_KEY,
+        JSON.stringify(openSections),
+      );
+    } catch {
+      // The dashboard still works when browser storage is unavailable.
+    }
+  }, [openSections]);
+
+  function toggleSection(sectionId: CollapsibleTaskSection) {
+    setOpenSections((currentSections) => ({
+      ...currentSections,
+      [sectionId]: !currentSections[sectionId],
+    }));
+  }
 
   function handleDashboardClick(event: MouseEvent<HTMLElement>) {
     if (!(event.target instanceof Element)) {
@@ -52,7 +145,7 @@ export function TaskDashboard({
     }
 
     const shouldKeepSelection = event.target.closest(
-      "button, input, textarea, form, .task-card, .calendar-panel",
+      "button, input, textarea, form, .task-card, .calendar-panel, .task-search",
     );
 
     if (!shouldKeepSelection) {
@@ -72,14 +165,27 @@ export function TaskDashboard({
               {taskError && <p className="dashboard-error">{taskError}</p>}
             </div>
 
-            <button
-              className="primary-button"
-              type="button"
-              onClick={onToggleAddTask}
-              aria-expanded={isAddingTask}
-            >
-              {isAddingTask ? "Close Form" : "+ Add Task"}
-            </button>
+            <div className="dashboard-card-actions">
+              <label className="task-search">
+                <span className="task-search-icon" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search tasks..."
+                  aria-label="Search tasks"
+                />
+              </label>
+
+              <button
+                className="primary-button"
+                type="button"
+                onClick={onToggleAddTask}
+                aria-expanded={isAddingTask}
+              >
+                {isAddingTask ? "Close Form" : "+ Add Task"}
+              </button>
+            </div>
           </div>
 
           {isAddingTask && (
@@ -91,13 +197,65 @@ export function TaskDashboard({
             />
           )}
 
-          {activeTaskGroups.map((taskGroup) => (
+          {visibleActiveTaskGroups.map((taskGroup) => {
+            const collapsibleSectionId =
+              taskGroup.id === "today" || taskGroup.id === "upcoming"
+                ? taskGroup.id
+                : null;
+
+            return (
+              <TaskSection
+                key={taskGroup.id}
+                title={taskGroup.title}
+                subtitle={taskGroup.subtitle}
+                emptyMessage={
+                  normalizedSearchQuery && taskGroup.id === "today"
+                    ? "No matching tasks due today."
+                    : taskGroup.emptyMessage
+                }
+                tasks={taskGroup.tasks}
+                hideHeader={isSearching}
+                variant={
+                  taskGroup.id === "past-due"
+                    ? "overdue"
+                    : taskGroup.id === "today"
+                      ? "today"
+                      : taskGroup.id === "upcoming"
+                        ? "upcoming"
+                        : "default"
+                }
+                isCollapsed={
+                  !isSearching && collapsibleSectionId
+                    ? !openSections[collapsibleSectionId]
+                    : false
+                }
+                onToggleCollapsed={
+                  !isSearching && collapsibleSectionId
+                    ? () => toggleSection(collapsibleSectionId)
+                    : undefined
+                }
+                editingTaskId={editingTaskId}
+                selectedTaskId={selectedTaskId}
+                onCancelEditTask={onCancelEditTask}
+                onDeleteTask={onDeleteTask}
+                onStartEditTask={onStartEditTask}
+                onToggleTaskCompleted={onToggleTaskCompleted}
+                onUpdateTask={onUpdateTask}
+              />
+            );
+          })}
+
+          {(!isSearching || filteredCompletedTasks.length > 0) && (
             <TaskSection
-              key={taskGroup.id}
-              title={taskGroup.title}
-              subtitle={taskGroup.subtitle}
-              emptyMessage={taskGroup.emptyMessage}
-              tasks={taskGroup.tasks}
+              title="Completed"
+              emptyMessage="No completed tasks yet."
+              tasks={filteredCompletedTasks}
+              variant="completed"
+              hideHeader={isSearching}
+              isCollapsed={isSearching ? false : !openSections.completed}
+              onToggleCollapsed={
+                isSearching ? undefined : () => toggleSection("completed")
+              }
               editingTaskId={editingTaskId}
               selectedTaskId={selectedTaskId}
               onCancelEditTask={onCancelEditTask}
@@ -106,20 +264,11 @@ export function TaskDashboard({
               onToggleTaskCompleted={onToggleTaskCompleted}
               onUpdateTask={onUpdateTask}
             />
-          ))}
+          )}
 
-          <TaskSection
-            title="Recently Completed"
-            emptyMessage="No completed tasks yet."
-            tasks={completedTasks}
-            editingTaskId={editingTaskId}
-            selectedTaskId={selectedTaskId}
-            onCancelEditTask={onCancelEditTask}
-            onDeleteTask={onDeleteTask}
-            onStartEditTask={onStartEditTask}
-            onToggleTaskCompleted={onToggleTaskCompleted}
-            onUpdateTask={onUpdateTask}
-          />
+          {isSearching && !hasSearchResults && (
+            <p className="task-search-empty">No tasks match your search.</p>
+          )}
         </section>
 
         <CalendarPanel

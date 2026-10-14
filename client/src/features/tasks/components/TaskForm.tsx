@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import type { NewTaskInput } from "../types";
-import { getSafeDueDate, getTodayDateValue } from "../utils/date";
+import { getDefaultDueDate } from "../utils/date";
 
 type TaskFormProps = {
   idPrefix: string;
@@ -22,9 +22,8 @@ export function TaskForm({
     initialValues?.description ?? "",
   );
   const [dueDate, setDueDate] = useState(
-    getSafeDueDate(initialValues?.dueDate),
+    getDefaultDueDate(initialValues?.dueDate),
   );
-  const todayDateValue = getTodayDateValue();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,7 +43,7 @@ export function TaskForm({
       nextTask.description = trimmedDescription;
     }
 
-    nextTask.dueDate = getSafeDueDate(dueDate);
+    nextTask.dueDate = getDefaultDueDate(dueDate);
 
     onSubmitTask(nextTask);
   }
@@ -81,7 +80,6 @@ export function TaskForm({
             id={`${idPrefix}-due-date`}
             type="date"
             value={dueDate}
-            min={todayDateValue}
             onChange={(event) => setDueDate(event.target.value)}
           />
         </div>

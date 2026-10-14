@@ -27,10 +27,6 @@ function getDueDateFromInput(value: unknown): ValidationResult<string> {
     return { error: "Due date must use YYYY-MM-DD." };
   }
 
-  if (value < getTodayDateValue()) {
-    return { error: "Due date cannot be before today." };
-  }
-
   return { data: value };
 }
 

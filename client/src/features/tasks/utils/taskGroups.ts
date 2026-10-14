@@ -2,7 +2,6 @@ import type { Task } from "../types";
 import {
   compareDateValues,
   formatSectionDate,
-  formatSectionWeekday,
   getTodayDateValue,
 } from "./date";
 
@@ -16,7 +15,9 @@ export type TaskGroup = {
 
 export function getActiveTaskGroups(tasks: Task[]) {
   const todayDateValue = getTodayDateValue();
-  const tasksByDate = new Map<string, Task[]>();
+  const pastDueTasks: Task[] = [];
+  const todayTasks: Task[] = [];
+  const upcomingTasks: Task[] = [];
   const tasksWithoutDueDate: Task[] = [];
 
   tasks.forEach((task) => {
@@ -25,32 +26,48 @@ export function getActiveTaskGroups(tasks: Task[]) {
       return;
     }
 
-    const tasksForDate = tasksByDate.get(task.dueDate) ?? [];
-    tasksForDate.push(task);
-    tasksByDate.set(task.dueDate, tasksForDate);
+    if (compareDateValues(task.dueDate, todayDateValue) < 0) {
+      pastDueTasks.push(task);
+      return;
+    }
+
+    if (task.dueDate === todayDateValue) {
+      todayTasks.push(task);
+      return;
+    }
+
+    upcomingTasks.push(task);
   });
 
-  const groups: TaskGroup[] = [
-    {
-      id: `date-${todayDateValue}`,
-      title: "Today",
-      subtitle: formatSectionDate(todayDateValue),
-      emptyMessage: "No tasks due today.",
-      tasks: tasksByDate.get(todayDateValue) ?? [],
-    },
-  ];
+  const groups: TaskGroup[] = [];
 
-  Array.from(tasksByDate.keys())
-    .filter((dateValue) => dateValue !== todayDateValue)
-    .sort(compareDateValues)
-    .forEach((dateValue) => {
-      groups.push({
-        id: `date-${dateValue}`,
-        title: formatSectionDate(dateValue),
-        subtitle: formatSectionWeekday(dateValue),
-        tasks: tasksByDate.get(dateValue) ?? [],
-      });
+  if (pastDueTasks.length > 0) {
+    groups.push({
+      id: "past-due",
+      title: "Past Due",
+      tasks: pastDueTasks.sort((firstTask, secondTask) =>
+        compareDateValues(firstTask.dueDate ?? "", secondTask.dueDate ?? ""),
+      ),
     });
+  }
+
+  groups.push({
+    id: "today",
+    title: "Today",
+    subtitle: formatSectionDate(todayDateValue),
+    emptyMessage: "No tasks due today.",
+    tasks: todayTasks,
+  });
+
+  if (upcomingTasks.length > 0) {
+    groups.push({
+      id: "upcoming",
+      title: "Upcoming",
+      tasks: upcomingTasks.sort((firstTask, secondTask) =>
+        compareDateValues(firstTask.dueDate ?? "", secondTask.dueDate ?? ""),
+      ),
+    });
+  }
 
   if (tasksWithoutDueDate.length > 0) {
     groups.push({

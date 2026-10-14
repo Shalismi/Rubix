@@ -1,16 +1,16 @@
+export type AppView = "dashboard" | "calendar";
+
 type NavItem = {
+  view?: AppView;
   label: string;
-  icon: "main" | "calendar" | "workspaces" | "settings";
-  isActive?: boolean;
+  icon: "main" | "calendar" | "settings";
 };
 
 const primaryNavItems: NavItem[] = [
-  { label: "Dashboard", icon: "main", isActive: true },
-  { label: "Calendar", icon: "calendar" },
-  { label: "Workspaces", icon: "workspaces" },
+  { label: "Dashboard", icon: "main", view: "dashboard" },
+  { label: "Calendar", icon: "calendar", view: "calendar" },
+  { label: "Settings", icon: "settings" },
 ];
-
-const secondaryNavItems: NavItem[] = [{ label: "Settings", icon: "settings" }];
 
 function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
   if (icon === "main") {
@@ -30,14 +30,6 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
     );
   }
 
-  if (icon === "workspaces") {
-    return (
-      <svg aria-hidden="true" viewBox="0 0 24 24">
-        <path d="M5 5h6v6H5V5ZM13 5h6v6h-6V5ZM5 13h6v6H5v-6ZM13 13h6v6h-6v-6Z" />
-      </svg>
-    );
-  }
-
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" />
@@ -46,11 +38,26 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
   );
 }
 
-function SidebarNavItem({ item }: { item: NavItem }) {
+function SidebarNavItem({
+  activeView,
+  item,
+  onSelectView,
+}: {
+  activeView: AppView;
+  item: NavItem;
+  onSelectView: (view: AppView) => void;
+}) {
+  const isActive = item.view === activeView;
+
   return (
     <button
-      className={`sidebar-nav-item${item.isActive ? " is-active" : ""}`}
+      className={`sidebar-nav-item${isActive ? " is-active" : ""}`}
       type="button"
+      onClick={() => {
+        if (item.view) {
+          onSelectView(item.view);
+        }
+      }}
     >
       <span className="sidebar-nav-icon">
         <SidebarIcon icon={item.icon} />
@@ -60,7 +67,12 @@ function SidebarNavItem({ item }: { item: NavItem }) {
   );
 }
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  activeView: AppView;
+  onSelectView: (view: AppView) => void;
+};
+
+export function AppSidebar({ activeView, onSelectView }: AppSidebarProps) {
   return (
     <aside className="app-sidebar" aria-label="Rubix navigation">
       <div className="sidebar-brand">
@@ -70,13 +82,12 @@ export function AppSidebar() {
 
       <nav className="sidebar-nav" aria-label="Primary navigation">
         {primaryNavItems.map((item) => (
-          <SidebarNavItem item={item} key={item.label} />
-        ))}
-      </nav>
-
-      <nav className="sidebar-nav sidebar-nav-bottom" aria-label="Settings">
-        {secondaryNavItems.map((item) => (
-          <SidebarNavItem item={item} key={item.label} />
+          <SidebarNavItem
+            activeView={activeView}
+            item={item}
+            key={item.label}
+            onSelectView={onSelectView}
+          />
         ))}
       </nav>
     </aside>

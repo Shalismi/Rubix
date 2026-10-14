@@ -1,6 +1,10 @@
 import { TaskForm } from "./TaskForm";
 import type { NewTaskInput, Task } from "../types";
-import { formatDueDate } from "../utils/date";
+import {
+  compareDateValues,
+  formatDueDate,
+  getTodayDateValue,
+} from "../utils/date";
 
 type TaskCardProps = {
   task: Task;
@@ -23,6 +27,12 @@ export function TaskCard({
   onToggleTaskCompleted,
   onUpdateTask,
 }: TaskCardProps) {
+  const isPastDue = Boolean(
+    !task.completed &&
+      task.dueDate &&
+      compareDateValues(task.dueDate, getTodayDateValue()) < 0,
+  );
+
   if (isEditing) {
     return (
       <article
@@ -44,8 +54,8 @@ export function TaskCard({
   return (
     <article
       className={`task-card${task.completed ? " is-complete" : ""}${
-        isSelected ? " is-selected" : ""
-      }`}
+        isPastDue ? " is-overdue" : ""
+      }${isSelected ? " is-selected" : ""}`}
       id={`task-${task.id}`}
     >
       <button
@@ -58,9 +68,25 @@ export function TaskCard({
       </button>
 
       <div className="task-content">
-        <h3>{task.title}</h3>
+        <div className="task-title-row">
+          {isPastDue && (
+            <span
+              className="task-overdue-indicator"
+              role="img"
+              aria-label="Past due"
+              title="Past due"
+            >
+              !
+            </span>
+          )}
+          <h3>{task.title}</h3>
+        </div>
         {task.description && <p className="task-description">{task.description}</p>}
-        {task.dueDate && <p>{formatDueDate(task.dueDate)}</p>}
+        {task.dueDate && (
+          <p className={`task-due-date${isPastDue ? " is-overdue" : ""}`}>
+            {formatDueDate(task.dueDate)}
+          </p>
+        )}
       </div>
 
       <div className="task-actions">
