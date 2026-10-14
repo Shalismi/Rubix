@@ -1,0 +1,266 @@
+#root {
+  width: 100%;
+}
+
+.app-shell {
+  --page-gutter: clamp(1rem, 4vw, 2rem);
+  --sidebar-width: 17rem;
+
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: 100vh;
+  background: #f4f6f8;
+  color: #111827;
+}
+
+.app-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid #e4e7ec;
+  background: #ffffff;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0 0.5rem;
+  color: #111827;
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+
+.sidebar-logo-mark {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 45%),
+    conic-gradient(from 135deg, #2563eb, #38bdf8, #a855f7, #fb7185, #f97316, #2563eb);
+  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.22);
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 2rem;
+}
+
+.sidebar-nav-bottom {
+  margin-top: auto;
+}
+
+.sidebar-nav-item {
+  display: grid;
+  grid-template-columns: 1.35rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 750;
+  text-align: left;
+}
+
+.sidebar-nav-item:hover,
+.sidebar-nav-item.is-active {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.sidebar-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.sidebar-nav-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
+.app-main {
+  min-width: 0;
+  padding: 1.5rem var(--page-gutter) 3rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  width: 100%;
+  padding: 0 0 1.25rem;
+}
+
+.account-area {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-width: min(100%, 16rem);
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.account-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 8px;
+  background: #182230;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.account-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.account-copy strong {
+  color: #182230;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.account-copy span {
+  overflow: hidden;
+  color: #475467;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 0 0 3rem;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: 2rem;
+  align-items: start;
+}
+
+.dashboard-card {
+  background: transparent;
+}
+
+.dashboard-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+}
+
+.dashboard-card-header h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.dashboard-card-header p {
+  margin: 0.4rem 0 0;
+  color: #667085;
+  font-size: 0.95rem;
+}
+
+.dashboard-card-header .dashboard-error {
+  color: #b42318;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    position: static;
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .sidebar-brand {
+    padding: 0;
+  }
+
+  .sidebar-nav,
+  .sidebar-nav-bottom {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+  }
+
+  .sidebar-nav-item {
+    grid-template-columns: 1.25rem auto;
+    width: auto;
+    min-width: max-content;
+  }
+
+  .app-main {
+    padding-top: 1rem;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-header {
+    align-items: stretch;
+  }
+
+  .account-area {
+    width: 100%;
+  }
+
+}
+
+@media (max-width: 460px) {
+  .account-area {
+    grid-template-columns: 2.4rem 1fr;
+  }
+
+  .dashboard-card-header {
+    padding: 1rem 0;
+  }
+}
