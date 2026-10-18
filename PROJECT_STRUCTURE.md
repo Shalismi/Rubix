@@ -12,6 +12,9 @@ App-level pieces that are not specific to one feature.
 
 - `components`: the sidebar and top account/header area.
 
+`client/src/config`
+Shared client configuration, including the environment-based API address.
+
 `client/src/features/auth`
 Account API requests, session state, registration, and sign-in UI.
 

@@ -1,10 +1,9 @@
+import { API_BASE_URL } from "../../../config/api";
 import type {
   AuthCredentials,
   AuthUser,
   PasswordChangeInput,
 } from "../types";
-
-const API_BASE_URL = "http://localhost:5000";
 
 type AuthResponse = {
   user: AuthUser;

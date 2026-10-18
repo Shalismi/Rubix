@@ -1,6 +1,5 @@
+import { API_BASE_URL } from "../../../config/api";
 import type { NewTaskInput, Task } from "../types";
-
-const API_BASE_URL = "http://localhost:5000";
 
 type TasksResponse = {
   tasks: Task[];

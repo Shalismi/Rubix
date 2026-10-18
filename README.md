@@ -20,6 +20,12 @@ npm.cmd run dev
 The client runs at `http://localhost:5173` and the API runs at
 `http://localhost:5000`.
 
+The client reads its API address from `VITE_API_URL`. Local development uses
+`http://localhost:5000` by default; `client/.env.example` shows the setting that
+must be supplied by the client hosting platform for a production build. Values
+whose names begin with `VITE_` are visible in browser code and must not contain
+passwords or other secrets.
+
 ## Database
 
 The server requires PostgreSQL and a local `server/.env` file based on
