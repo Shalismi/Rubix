@@ -79,6 +79,10 @@ jobs:
         run: npm ci
         working-directory: server
 
+      - name: Generate Prisma client
+        run: npm run db:generate
+        working-directory: server
+
       - name: Run integration tests
         run: npm test
         working-directory: server

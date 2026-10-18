@@ -27,6 +27,7 @@ The server requires PostgreSQL and a local `server/.env` file based on
 
 ```powershell
 cd C:\Mushroom\Rubix\server
+npm.cmd run db:generate
 npm.cmd run db:migrate
 ```
 
