@@ -11,7 +11,12 @@ Connects the main app layout together.
 App-level pieces that are not specific to one feature.
 
 - `components`: the sidebar and top account/header area.
-- `hooks`: app-wide hooks, like checking whether the backend is reachable.
+
+`client/src/features/auth`
+Account API requests, session state, registration, and sign-in UI.
+
+`client/src/features/settings`
+Logged-in account settings, including password changes.
 
 `client/src/features/tasks`
 Everything for the task feature.
@@ -44,6 +49,9 @@ Everything for the task API feature.
 - `taskSerializer.ts`: converts database tasks into API responses.
 - `taskTypes.ts`: task API TypeScript shapes.
 
+`server/src/features/auth`
+Registration, login, logout, sessions, password hashing, and password changes.
+
 `server/src/middleware`
 Reusable Express helpers, like async error catching and the final error response.
 
@@ -52,3 +60,7 @@ Database schema and migration history.
 
 - `schema.prisma`: models/tables Rubix needs.
 - `migrations`: SQL history Prisma created and applied to PostgreSQL.
+
+`server/tests`
+Integration tests for authentication, session security, task ownership, and
+task CRUD. The helper creates and removes a separate `rubix_test` database.
