@@ -1,4 +1,4 @@
-export type AppView = "dashboard" | "calendar";
+export type AppView = "dashboard" | "calendar" | "settings";
 
 type NavItem = {
   view?: AppView;
@@ -9,7 +9,7 @@ type NavItem = {
 const primaryNavItems: NavItem[] = [
   { label: "Dashboard", icon: "main", view: "dashboard" },
   { label: "Calendar", icon: "calendar", view: "calendar" },
-  { label: "Settings", icon: "settings" },
+  { label: "Settings", icon: "settings", view: "settings" },
 ];
 
 function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {

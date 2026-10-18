@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "../../db/prisma.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
+import { requireAuth } from "../../middleware/requireAuth.js";
 import { serializeTask } from "./taskSerializer.js";
 import type { TaskInput } from "./taskTypes.js";
 import {
@@ -11,10 +12,13 @@ import {
 
 export const taskRouter = Router();
 
+taskRouter.use(requireAuth);
+
 taskRouter.get(
   "/",
   asyncHandler(async (req, res) => {
     const tasks = await prisma.task.findMany({
+      where: { userId: req.auth!.user.id },
       orderBy: [{ completed: "asc" }, { dueDate: "asc" }, { id: "desc" }],
     });
 
@@ -33,7 +37,10 @@ taskRouter.post(
     }
 
     const task = await prisma.task.create({
-      data: taskData.data,
+      data: {
+        ...taskData.data,
+        userId: req.auth!.user.id,
+      },
     });
 
     res.status(201).json({ task: serializeTask(task) });
@@ -50,8 +57,11 @@ taskRouter.patch(
       return;
     }
 
-    const existingTask = await prisma.task.findUnique({
-      where: { id: taskId },
+    const existingTask = await prisma.task.findFirst({
+      where: {
+        id: taskId,
+        userId: req.auth!.user.id,
+      },
     });
 
     if (!existingTask) {
@@ -85,8 +95,11 @@ taskRouter.delete(
       return;
     }
 
-    const existingTask = await prisma.task.findUnique({
-      where: { id: taskId },
+    const existingTask = await prisma.task.findFirst({
+      where: {
+        id: taskId,
+        userId: req.auth!.user.id,
+      },
     });
 
     if (!existingTask) {

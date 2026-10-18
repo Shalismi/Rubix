@@ -15,9 +15,15 @@ const DEFAULT_OPEN_SECTIONS: OpenTaskSections = {
   completed: true,
 };
 
-function getSavedOpenSections(): OpenTaskSections {
+function getTaskSectionStorageKey(userId: number) {
+  return `${TASK_SECTION_STORAGE_KEY}.${userId}`;
+}
+
+function getSavedOpenSections(userId: number): OpenTaskSections {
   try {
-    const savedValue = window.localStorage.getItem(TASK_SECTION_STORAGE_KEY);
+    const savedValue = window.localStorage.getItem(
+      getTaskSectionStorageKey(userId),
+    );
 
     if (!savedValue) {
       return { ...DEFAULT_OPEN_SECTIONS };
@@ -45,6 +51,7 @@ function getSavedOpenSections(): OpenTaskSections {
 }
 
 type TaskDashboardProps = {
+  userId: number;
   activeTasks: Task[];
   completedTasks: Task[];
   editingTaskId: number | null;
@@ -80,6 +87,7 @@ function filterTasks(tasks: Task[], searchQuery: string) {
 }
 
 export function TaskDashboard({
+  userId,
   activeTasks,
   completedTasks,
   editingTaskId,
@@ -99,8 +107,9 @@ export function TaskDashboard({
   onUpdateTask,
 }: TaskDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [openSections, setOpenSections] =
-    useState<OpenTaskSections>(getSavedOpenSections);
+  const [openSections, setOpenSections] = useState<OpenTaskSections>(() =>
+    getSavedOpenSections(userId),
+  );
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const isSearching = normalizedSearchQuery.length > 0;
   const filteredActiveTasks = useMemo(
@@ -124,13 +133,13 @@ export function TaskDashboard({
   useEffect(() => {
     try {
       window.localStorage.setItem(
-        TASK_SECTION_STORAGE_KEY,
+        getTaskSectionStorageKey(userId),
         JSON.stringify(openSections),
       );
     } catch {
       // The dashboard still works when browser storage is unavailable.
     }
-  }, [openSections]);
+  }, [openSections, userId]);
 
   function toggleSection(sectionId: CollapsibleTaskSection) {
     setOpenSections((currentSections) => ({

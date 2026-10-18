@@ -12,6 +12,7 @@ type TaskResponse = {
 
 async function request<T>(path: string, options?: RequestInit) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,

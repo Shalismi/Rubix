@@ -7,8 +7,34 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique
+  passwordHash String    @map("password_hash")
+  sessions     Session[]
+  tasks        Task[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Session {
+  /// SHA-256 fingerprint of the random token stored in the browser cookie.
+  id        String   @id
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
 model Task {
   id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
   title       String
   description String?
   /// Date-only value in YYYY-MM-DD format, matching the client date input.
@@ -16,6 +42,8 @@ model Task {
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("tasks")
 }
