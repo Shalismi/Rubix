@@ -41,6 +41,9 @@ Starts the API server.
 `server/src/app.ts`
 Creates the Express app, registers middleware, health check, routes, and error handling.
 
+`server/src/config`
+Validates shared server environment settings such as the client origin and port.
+
 `server/src/db`
 Database connection setup.
 

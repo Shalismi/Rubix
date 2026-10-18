@@ -26,6 +26,15 @@ must be supplied by the client hosting platform for a production build. Values
 whose names begin with `VITE_` are visible in browser code and must not contain
 passwords or other secrets.
 
+For production hosting, configure the client with `VITE_API_URL`. Configure the
+server with `DATABASE_URL`, the exact HTTPS `CLIENT_ORIGIN`, and
+`NODE_ENV=production`. Hosting platforms normally provide `PORT` automatically.
+Apply committed database migrations in production with:
+
+```powershell
+npm.cmd run db:migrate:deploy
+```
+
 ## Database
 
 The server requires PostgreSQL and a local `server/.env` file based on

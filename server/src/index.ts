@@ -1,8 +1,6 @@
-import "dotenv/config";
 import { app } from "./app.js";
+import { environment } from "./config/environment.js";
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(environment.port, () => {
+  console.log(`Rubix API listening on port ${environment.port}`);
 });

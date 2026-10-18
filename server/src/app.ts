@@ -1,16 +1,16 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { environment } from "./config/environment.js";
 import { authRouter } from "./features/auth/authRoutes.js";
 import { taskRouter } from "./features/tasks/taskRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 export const app = express();
-const clientOrigin = process.env.CLIENT_ORIGIN ?? "http://localhost:5173";
 
 app.use(
   cors({
-    origin: clientOrigin,
+    origin: environment.clientOrigin,
     credentials: true,
   }),
 );

@@ -1,18 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { CookieOptions, Request, Response } from "express";
+import { environment } from "../../config/environment.js";
 import { prisma } from "../../db/prisma.js";
 import type { AuthSession } from "./authTypes.js";
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
-const isProduction = process.env.NODE_ENV === "production";
-const SESSION_COOKIE_NAME = isProduction
+const SESSION_COOKIE_NAME = environment.isProduction
   ? "__Host-rubix_session"
   : "rubix_session";
 
 const sessionCookieOptions: CookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: isProduction,
+  sameSite: environment.isProduction ? "none" : "lax",
+  secure: environment.isProduction,
   path: "/",
 };
 
