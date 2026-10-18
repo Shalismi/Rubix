@@ -7,11 +7,15 @@ const nodeEnvironment = process.env.NODE_ENV?.trim() || "development";
 const isProduction = nodeEnvironment === "production";
 
 function getClientOrigin() {
-  const configuredOrigin = process.env.CLIENT_ORIGIN?.trim();
+  const configuredOrigin =
+    process.env.CLIENT_ORIGIN?.trim() ||
+    process.env.RENDER_EXTERNAL_URL?.trim();
 
   if (!configuredOrigin) {
     if (isProduction) {
-      throw new Error("CLIENT_ORIGIN is required in production.");
+      throw new Error(
+        "CLIENT_ORIGIN is required in production outside Render.",
+      );
     }
 
     return DEFAULT_CLIENT_ORIGIN;

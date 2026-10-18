@@ -20,15 +20,16 @@ npm.cmd run dev
 The client runs at `http://localhost:5173` and the API runs at
 `http://localhost:5000`.
 
-The client reads its API address from `VITE_API_URL`. Local development uses
-`http://localhost:5000` by default; `client/.env.example` shows the setting that
-must be supplied by the client hosting platform for a production build. Values
+The client can read its API address from `VITE_API_URL`. Local development uses
+`http://localhost:5000` by default. In the combined production deployment, the
+client uses the same origin as the API, so this variable is optional. Values
 whose names begin with `VITE_` are visible in browser code and must not contain
 passwords or other secrets.
 
-For production hosting, configure the client with `VITE_API_URL`. Configure the
-server with `DATABASE_URL`, the exact HTTPS `CLIENT_ORIGIN`, and
-`NODE_ENV=production`. Hosting platforms normally provide `PORT` automatically.
+For production hosting, configure the server with `DATABASE_URL` and
+`NODE_ENV=production`. Render provides the HTTPS origin and `PORT`
+automatically. Other hosting platforms also need the exact HTTPS
+`CLIENT_ORIGIN`.
 Apply committed database migrations in production with:
 
 ```powershell
@@ -69,3 +70,16 @@ GitHub Actions runner.
 CI verifies the project automatically, but it does not publish the application
 to the internet. Hosting the client, API, and production database is a separate
 deployment step.
+
+## Render Deployment
+
+Rubix deploys as one Render web service. Express serves the built React client
+and the `/api` routes from the same public origin.
+
+- Build command: `npm run render-build`
+- Start command: `npm start`
+- Health check path: `/api/health`
+- Root directory: leave blank
+
+The Render service needs `DATABASE_URL` and `NODE_ENV=production`. Render
+provides its public URL and listening port automatically.

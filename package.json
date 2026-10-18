@@ -1,0 +1,11 @@
+{
+  "name": "rubix",
+  "private": true,
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "render-build": "npm ci --prefix client && npm ci --prefix server && npm run db:generate --prefix server && npm run build --prefix client && npm run build --prefix server && npm run db:migrate:deploy --prefix server",
+    "start": "npm start --prefix server"
+  }
+}

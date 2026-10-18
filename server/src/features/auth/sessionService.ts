@@ -11,7 +11,7 @@ const SESSION_COOKIE_NAME = environment.isProduction
 
 const sessionCookieOptions: CookieOptions = {
   httpOnly: true,
-  sameSite: environment.isProduction ? "none" : "lax",
+  sameSite: "lax",
   secure: environment.isProduction,
   path: "/",
 };

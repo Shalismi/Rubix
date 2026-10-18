@@ -2,6 +2,10 @@
 
 Rubix is split into a React client and an Express/PostgreSQL server.
 
+`package.json`
+Provides the root build and start commands used by Render to deploy both apps
+as one web service.
+
 ## Client
 
 `client/src/App.tsx`
