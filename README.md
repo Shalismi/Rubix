@@ -3,6 +3,8 @@
 Rubix is a full-stack task management application built with React,
 TypeScript, Express, PostgreSQL, and Prisma.
 
+Live app: [https://rubix-feqe.onrender.com](https://rubix-feqe.onrender.com)
+
 ## Run Locally
 
 Start the API from `C:\Mushroom\Rubix\server`:
