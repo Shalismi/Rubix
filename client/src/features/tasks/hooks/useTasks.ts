@@ -6,6 +6,7 @@ import {
   updateTask as updateTaskRequest,
 } from "../api/tasksApi";
 import type { NewTaskInput, Task } from "../types";
+import type { Tag } from "../../tags/types";
 import { getDefaultDueDate } from "../utils/date";
 
 function splitTasks(tasks: Task[]) {
@@ -23,6 +24,10 @@ function buildTaskInput(taskInput: NewTaskInput) {
 
   if (taskInput.description) {
     nextTask.description = taskInput.description;
+  }
+
+  if (taskInput.tagIds !== undefined) {
+    nextTask.tagIds = taskInput.tagIds;
   }
 
   return nextTask;
@@ -168,6 +173,26 @@ export function useTasks() {
     setIsAddingTask(false);
   }
 
+  function syncTag(updatedTag: Tag) {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => ({
+        ...task,
+        tags: task.tags.map((tag) =>
+          tag.id === updatedTag.id ? updatedTag : tag,
+        ),
+      })),
+    );
+  }
+
+  function removeTag(tagId: number) {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => ({
+        ...task,
+        tags: task.tags.filter((tag) => tag.id !== tagId),
+      })),
+    );
+  }
+
   return {
     activeTasks,
     completedTasks,
@@ -183,8 +208,10 @@ export function useTasks() {
     deleteTask,
     selectTask,
     startEditingTask,
+    syncTag,
     toggleAddTask,
     toggleTaskCompleted,
     updateTask,
+    removeTag,
   };
 }

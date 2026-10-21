@@ -25,6 +25,14 @@ Account API requests, session state, registration, and sign-in UI.
 `client/src/features/settings`
 Logged-in account settings, including password changes.
 
+`client/src/features/tags`
+Reusable account-owned tags and their colors.
+
+- `api`: browser requests to the tag API.
+- `components`: tag pills, task picker, filter menu, and tag manager.
+- `hooks`: loads tags and handles create, edit, and delete state.
+- `types.ts`: tag TypeScript shapes shared with the task feature.
+
 `client/src/features/tasks`
 Everything for the task feature.
 
@@ -62,6 +70,9 @@ Everything for the task API feature.
 `server/src/features/auth`
 Registration, login, logout, sessions, password hashing, and password changes.
 
+`server/src/features/tags`
+Account-owned tag endpoints, validation, colors, and duplicate-name rules.
+
 `server/src/middleware`
 Reusable Express helpers, like async error catching and the final error response.
 
@@ -72,5 +83,5 @@ Database schema and migration history.
 - `migrations`: SQL history Prisma created and applied to PostgreSQL.
 
 `server/tests`
-Integration tests for authentication, session security, task ownership, and
-task CRUD. The helper creates and removes a separate `rubix_test` database.
+Integration tests for authentication, session security, task and tag ownership,
+and task CRUD. The helper creates and removes a separate `rubix_test` database.

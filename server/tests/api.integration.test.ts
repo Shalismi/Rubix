@@ -38,6 +38,13 @@ type Task = {
   description?: string;
   dueDate: string;
   completed: boolean;
+  tags: Tag[];
+};
+
+type Tag = {
+  id: number;
+  name: string;
+  color: string;
 };
 
 let apiUrl = "";
@@ -118,6 +125,7 @@ test("Rubix authentication and user-owned task flow", async (context) => {
   let firstUserCookie = "";
   let secondUserCookie = "";
   let taskId = 0;
+  let tagId = 0;
 
   await context.test("enforces the complete password policy", async () => {
     const response = await request<{ message: string }>("/api/auth/register", {
@@ -162,6 +170,37 @@ test("Rubix authentication and user-owned task flow", async (context) => {
     assert.equal(response.status, 401);
   });
 
+  await context.test("creates reusable tags owned by one user", async () => {
+    const createdTag = await request<{ tag: Tag }>("/api/tags", {
+      method: "POST",
+      cookie: firstUserCookie,
+      body: { name: "Work", color: "#2563EB" },
+    });
+
+    assert.equal(createdTag.status, 201);
+    assert.equal(createdTag.body?.tag.name, "Work");
+    assert.equal(createdTag.body?.tag.color, "#2563EB");
+    tagId = createdTag.body!.tag.id;
+
+    const duplicateTag = await request<{ message: string }>("/api/tags", {
+      method: "POST",
+      cookie: firstUserCookie,
+      body: { name: "work", color: "#16A34A" },
+    });
+    const secondUserTags = await request<{ tags: Tag[] }>("/api/tags", {
+      cookie: secondUserCookie,
+    });
+    const forbiddenEdit = await request(`/api/tags/${tagId}`, {
+      method: "PATCH",
+      cookie: secondUserCookie,
+      body: { name: "Stolen", color: "#DC2626" },
+    });
+
+    assert.equal(duplicateTag.status, 409);
+    assert.equal(secondUserTags.body?.tags.length, 0);
+    assert.equal(forbiddenEdit.status, 404);
+  });
+
   await context.test("keeps each user's tasks private", async () => {
     const createdTask = await request<{ task: Task }>("/api/tasks", {
       method: "POST",
@@ -170,11 +209,15 @@ test("Rubix authentication and user-owned task flow", async (context) => {
         title: "Private integration task",
         description: "Only account one should see this.",
         dueDate: "2026-10-18",
+        tagIds: [tagId],
       },
     });
 
     assert.equal(createdTask.status, 201);
     assert.equal(createdTask.body?.task.completed, false);
+    assert.deepEqual(createdTask.body?.task.tags, [
+      { id: tagId, name: "Work", color: "#2563EB" },
+    ]);
     taskId = createdTask.body!.task.id;
 
     const firstUserTasks = await request<{ tasks: Task[] }>("/api/tasks", {
@@ -201,6 +244,14 @@ test("Rubix authentication and user-owned task flow", async (context) => {
 
     assert.equal(forbiddenUpdate.status, 404);
     assert.equal(forbiddenDelete.status, 404);
+
+    const forbiddenTagUse = await request("/api/tasks", {
+      method: "POST",
+      cookie: secondUserCookie,
+      body: { title: "Wrong tag owner", tagIds: [tagId] },
+    });
+
+    assert.equal(forbiddenTagUse.status, 400);
   });
 
   await context.test("updates, completes, and deletes an owned task", async () => {
@@ -213,6 +264,31 @@ test("Rubix authentication and user-owned task flow", async (context) => {
     assert.equal(updatedTask.status, 200);
     assert.equal(updatedTask.body?.task.title, "Updated private task");
     assert.equal(updatedTask.body?.task.completed, true);
+
+    const updatedTag = await request<{ tag: Tag }>(`/api/tags/${tagId}`, {
+      method: "PATCH",
+      cookie: firstUserCookie,
+      body: { name: "Focus", color: "#7C3AED" },
+    });
+    const taskWithUpdatedTag = await request<{ tasks: Task[] }>("/api/tasks", {
+      cookie: firstUserCookie,
+    });
+
+    assert.equal(updatedTag.status, 200);
+    assert.deepEqual(taskWithUpdatedTag.body?.tasks[0]?.tags, [
+      { id: tagId, name: "Focus", color: "#7C3AED" },
+    ]);
+
+    const deletedTag = await request(`/api/tags/${tagId}`, {
+      method: "DELETE",
+      cookie: firstUserCookie,
+    });
+    const taskWithoutTag = await request<{ tasks: Task[] }>("/api/tasks", {
+      cookie: firstUserCookie,
+    });
+
+    assert.equal(deletedTag.status, 204);
+    assert.deepEqual(taskWithoutTag.body?.tasks[0]?.tags, []);
 
     const deletedTask = await request(`/api/tasks/${taskId}`, {
       method: "DELETE",

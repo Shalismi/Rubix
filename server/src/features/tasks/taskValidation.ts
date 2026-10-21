@@ -30,6 +30,27 @@ function getDueDateFromInput(value: unknown): ValidationResult<string> {
   return { data: value };
 }
 
+function getTagIdsFromInput(value: unknown): ValidationResult<number[]> {
+  if (value === undefined) {
+    return { data: [] };
+  }
+
+  if (
+    !Array.isArray(value) ||
+    value.some((tagId) => !Number.isInteger(tagId) || tagId <= 0)
+  ) {
+    return { error: "Tag ids must be an array of positive numbers." };
+  }
+
+  const uniqueTagIds = [...new Set(value as number[])];
+
+  if (uniqueTagIds.length > 10) {
+    return { error: "A task can have up to 10 tags." };
+  }
+
+  return { data: uniqueTagIds };
+}
+
 export function parseTaskId(idParam: unknown) {
   if (typeof idParam !== "string") {
     return null;
@@ -57,10 +78,17 @@ export function buildTaskCreateData(
     return dueDateResult;
   }
 
+  const tagIdsResult = getTagIdsFromInput(input.tagIds);
+
+  if ("error" in tagIdsResult) {
+    return tagIdsResult;
+  }
+
   const task: TaskCreateData = {
     title: input.title.trim(),
     dueDate: dueDateResult.data,
     completed: false,
+    tagIds: tagIdsResult.data,
   };
 
   if (typeof input.description === "string" && input.description.trim()) {
@@ -103,6 +131,16 @@ export function buildTaskUpdateData(
 
   if (typeof input.completed === "boolean") {
     updates.completed = input.completed;
+  }
+
+  if (input.tagIds !== undefined) {
+    const tagIdsResult = getTagIdsFromInput(input.tagIds);
+
+    if ("error" in tagIdsResult) {
+      return tagIdsResult;
+    }
+
+    updates.tagIds = tagIdsResult.data;
   }
 
   return { data: updates };

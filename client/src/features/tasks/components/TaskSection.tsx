@@ -1,4 +1,5 @@
 import { TaskCard } from "./TaskCard";
+import type { Tag, TagInput } from "../../tags/types";
 import type { NewTaskInput, Task } from "../types";
 
 type TaskSectionVariant =
@@ -13,6 +14,8 @@ type TaskSectionProps = {
   subtitle?: string;
   emptyMessage?: string;
   tasks: Task[];
+  availableTags: Tag[];
+  onAddTag: (tag: TagInput) => Promise<Tag | null>;
   variant?: TaskSectionVariant;
   isCollapsed?: boolean;
   hideHeader?: boolean;
@@ -31,6 +34,8 @@ export function TaskSection({
   subtitle,
   emptyMessage = "No tasks here yet.",
   tasks,
+  availableTags,
+  onAddTag,
   variant = "default",
   isCollapsed = false,
   hideHeader = false,
@@ -96,6 +101,8 @@ export function TaskSection({
             <TaskCard
               key={task.id}
               task={task}
+              availableTags={availableTags}
+              onAddTag={onAddTag}
               isEditing={editingTaskId === task.id}
               isSelected={selectedTaskId === task.id}
               onCancelEditTask={onCancelEditTask}

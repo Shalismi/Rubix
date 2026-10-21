@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { TagFilter } from "../../tags/components/TagFilter";
+import type { Tag } from "../../tags/types";
 import type { Task } from "../types";
 import {
   compareDateValues,
@@ -10,7 +12,10 @@ import {
 type TaskCalendarViewProps = {
   selectedTaskId: number | null;
   tasks: Task[];
+  tags: Tag[];
+  selectedTagIds: number[];
   onSelectTask: (taskId: number) => void;
+  onSelectedTagIdsChange: (tagIds: number[]) => void;
 };
 
 type DatedTask = Task & {
@@ -55,7 +60,10 @@ function getMonthCalendarDates(monthDate: Date) {
 export function TaskCalendarView({
   selectedTaskId,
   tasks,
+  tags,
+  selectedTagIds,
   onSelectTask,
+  onSelectedTagIdsChange,
 }: TaskCalendarViewProps) {
   const [visibleMonth, setVisibleMonth] = useState(() => getMonthStart(new Date()));
   const todayDateValue = getTodayDateValue();
@@ -64,6 +72,11 @@ export function TaskCalendarView({
     const nextTasksByDate = new Map<string, DatedTask[]>();
 
     tasks
+      .filter(
+        (task) =>
+          selectedTagIds.length === 0 ||
+          task.tags.some((tag) => selectedTagIds.includes(tag.id)),
+      )
       .filter(hasDueDate)
       .sort((firstTask, secondTask) => {
         if (firstTask.completed !== secondTask.completed) {
@@ -79,7 +92,7 @@ export function TaskCalendarView({
       });
 
     return nextTasksByDate;
-  }, [tasks]);
+  }, [selectedTagIds, tasks]);
 
   function showPreviousMonth() {
     setVisibleMonth((currentMonth) => addMonths(currentMonth, -1));
@@ -101,26 +114,33 @@ export function TaskCalendarView({
           <h2 id="calendar-view-heading">{getMonthTitle(visibleMonth)}</h2>
         </div>
 
-        <div className="calendar-view-controls" aria-label="Calendar controls">
-          <button
-            className="calendar-view-control"
-            type="button"
-            onClick={showPreviousMonth}
-            aria-label="Previous month"
-          >
-            {"<"}
-          </button>
-          <button className="calendar-view-today" type="button" onClick={showToday}>
-            Today
-          </button>
-          <button
-            className="calendar-view-control"
-            type="button"
-            onClick={showNextMonth}
-            aria-label="Next month"
-          >
-            {">"}
-          </button>
+        <div className="calendar-view-header-actions">
+          <TagFilter
+            tags={tags}
+            selectedTagIds={selectedTagIds}
+            onChange={onSelectedTagIdsChange}
+          />
+          <div className="calendar-view-controls" aria-label="Calendar controls">
+            <button
+              className="calendar-view-control"
+              type="button"
+              onClick={showPreviousMonth}
+              aria-label="Previous month"
+            >
+              {"<"}
+            </button>
+            <button className="calendar-view-today" type="button" onClick={showToday}>
+              Today
+            </button>
+            <button
+              className="calendar-view-control"
+              type="button"
+              onClick={showNextMonth}
+              aria-label="Next month"
+            >
+              {">"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -155,7 +175,17 @@ export function TaskCalendarView({
                     onClick={() => onSelectTask(task.id)}
                     title={task.title}
                   >
-                    {task.title}
+                    <span className="calendar-view-task-title">{task.title}</span>
+                    {task.tags.length > 0 && (
+                      <span className="calendar-view-task-tags" aria-hidden="true">
+                        {task.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag.id}
+                            style={{ backgroundColor: tag.color }}
+                          />
+                        ))}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -165,7 +195,11 @@ export function TaskCalendarView({
       </div>
 
       {tasksByDate.size === 0 && (
-        <p className="calendar-empty">No dated tasks yet.</p>
+        <p className="calendar-empty">
+          {selectedTagIds.length > 0
+            ? "No tasks match the selected tags."
+            : "No dated tasks yet."}
+        </p>
       )}
     </main>
   );

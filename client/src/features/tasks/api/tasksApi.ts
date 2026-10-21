@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "../../../config/api";
-import type { NewTaskInput, Task } from "../types";
+import type { NewTaskInput, Task, TaskUpdateInput } from "../types";
 
 type TasksResponse = {
   tasks: Task[];
@@ -45,7 +45,7 @@ export async function createTask(task: NewTaskInput) {
   return data.task;
 }
 
-export async function updateTask(taskId: number, task: Partial<Task>) {
+export async function updateTask(taskId: number, task: TaskUpdateInput) {
   const data = await request<TaskResponse>(`/api/tasks/${taskId}`, {
     method: "PATCH",
     body: JSON.stringify(task),

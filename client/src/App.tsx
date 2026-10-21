@@ -6,6 +6,7 @@ import "./styles/tasks.css";
 import "./styles/calendar.css";
 import "./styles/auth.css";
 import "./styles/settings.css";
+import "./styles/tags.css";
 import { AppHeader } from "./app/components/AppHeader";
 import { AppSidebar, type AppView } from "./app/components/AppSidebar";
 import {
@@ -15,6 +16,8 @@ import {
 import { useAuth } from "./features/auth/hooks/useAuth";
 import type { AuthUser } from "./features/auth/types";
 import { AccountSettings } from "./features/settings/components/AccountSettings";
+import { useTags } from "./features/tags/hooks/useTags";
+import type { TagInput } from "./features/tags/types";
 import { TaskCalendarView } from "./features/tasks/components/TaskCalendarView";
 import { TaskDashboard } from "./features/tasks/components/TaskDashboard";
 import { useTasks } from "./features/tasks/hooks/useTasks";
@@ -33,9 +36,34 @@ function AuthenticatedApp({
   user,
 }: AuthenticatedAppProps) {
   const [activeView, setActiveView] = useState<AppView>("dashboard");
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const tasks = useTasks();
+  const tags = useTags();
   const allTasks = [...tasks.activeTasks, ...tasks.completedTasks];
   let activeContent;
+
+  async function handleEditTag(tagId: number, input: TagInput) {
+    const updatedTag = await tags.editTag(tagId, input);
+
+    if (updatedTag) {
+      tasks.syncTag(updatedTag);
+    }
+
+    return updatedTag;
+  }
+
+  async function handleRemoveTag(tagId: number) {
+    const wasRemoved = await tags.removeTag(tagId);
+
+    if (wasRemoved) {
+      tasks.removeTag(tagId);
+      setSelectedTagIds((currentTagIds) =>
+        currentTagIds.filter((selectedTagId) => selectedTagId !== tagId),
+      );
+    }
+
+    return wasRemoved;
+  }
 
   if (activeView === "dashboard") {
     activeContent = (
@@ -48,6 +76,10 @@ function AuthenticatedApp({
         isLoadingTasks={tasks.isLoadingTasks}
         selectedTaskId={tasks.selectedTaskId}
         taskError={tasks.taskError}
+        tags={tags.tags}
+        selectedTagIds={selectedTagIds}
+        isLoadingTags={tags.isLoadingTags}
+        tagError={tags.tagError}
         onAddTask={tasks.addTask}
         onCancelAddTask={tasks.cancelAddTask}
         onCancelEditTask={tasks.cancelEditingTask}
@@ -58,6 +90,10 @@ function AuthenticatedApp({
         onToggleAddTask={tasks.toggleAddTask}
         onToggleTaskCompleted={tasks.toggleTaskCompleted}
         onUpdateTask={tasks.updateTask}
+        onSelectedTagIdsChange={setSelectedTagIds}
+        onAddTag={tags.addTag}
+        onEditTag={handleEditTag}
+        onRemoveTag={handleRemoveTag}
       />
     );
   } else if (activeView === "calendar") {
@@ -65,7 +101,10 @@ function AuthenticatedApp({
       <TaskCalendarView
         selectedTaskId={tasks.selectedTaskId}
         tasks={allTasks}
+        tags={tags.tags}
+        selectedTagIds={selectedTagIds}
         onSelectTask={tasks.selectTask}
+        onSelectedTagIdsChange={setSelectedTagIds}
       />
     );
   } else {

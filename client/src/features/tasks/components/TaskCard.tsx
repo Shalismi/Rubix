@@ -1,4 +1,6 @@
 import { TaskForm } from "./TaskForm";
+import { TagPill } from "../../tags/components/TagPill";
+import type { Tag, TagInput } from "../../tags/types";
 import type { NewTaskInput, Task } from "../types";
 import {
   compareDateValues,
@@ -8,6 +10,8 @@ import {
 
 type TaskCardProps = {
   task: Task;
+  availableTags: Tag[];
+  onAddTag: (tag: TagInput) => Promise<Tag | null>;
   isEditing: boolean;
   isSelected: boolean;
   onCancelEditTask: () => void;
@@ -19,6 +23,8 @@ type TaskCardProps = {
 
 export function TaskCard({
   task,
+  availableTags,
+  onAddTag,
   isEditing,
   isSelected,
   onCancelEditTask,
@@ -43,6 +49,8 @@ export function TaskCard({
         <TaskForm
           idPrefix={`edit-task-${task.id}`}
           initialValues={task}
+          tags={availableTags}
+          onAddTag={onAddTag}
           submitLabel="Save Task"
           onSubmitTask={(nextTask) => onUpdateTask(task.id, nextTask)}
           onCancel={onCancelEditTask}
@@ -82,6 +90,13 @@ export function TaskCard({
           <h3>{task.title}</h3>
         </div>
         {task.description && <p className="task-description">{task.description}</p>}
+        {task.tags.length > 0 && (
+          <div className="task-tags" aria-label="Task tags">
+            {task.tags.map((tag) => (
+              <TagPill tag={tag} key={tag.id} />
+            ))}
+          </div>
+        )}
         {task.dueDate && (
           <p className={`task-due-date${isPastDue ? " is-overdue" : ""}`}>
             {formatDueDate(task.dueDate)}

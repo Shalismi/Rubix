@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { environment } from "./config/environment.js";
 import { authRouter } from "./features/auth/authRoutes.js";
+import { tagRouter } from "./features/tags/tagRoutes.js";
 import { taskRouter } from "./features/tasks/taskRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -26,6 +27,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/tags", tagRouter);
 app.use("/api/tasks", taskRouter);
 
 if (environment.isProduction) {

@@ -1,11 +1,15 @@
 import { useState, type FormEvent } from "react";
-import type { NewTaskInput } from "../types";
+import { TagPicker } from "../../tags/components/TagPicker";
+import type { Tag, TagInput } from "../../tags/types";
+import type { NewTaskInput, Task } from "../types";
 import { getDefaultDueDate } from "../utils/date";
 
 type TaskFormProps = {
   idPrefix: string;
   submitLabel: string;
-  initialValues?: NewTaskInput;
+  tags: Tag[];
+  initialValues?: Task;
+  onAddTag: (tag: TagInput) => Promise<Tag | null>;
   onSubmitTask: (task: NewTaskInput) => void;
   onCancel: () => void;
 };
@@ -13,7 +17,9 @@ type TaskFormProps = {
 export function TaskForm({
   idPrefix,
   submitLabel,
+  tags,
   initialValues,
+  onAddTag,
   onSubmitTask,
   onCancel,
 }: TaskFormProps) {
@@ -23,6 +29,9 @@ export function TaskForm({
   );
   const [dueDate, setDueDate] = useState(
     getDefaultDueDate(initialValues?.dueDate),
+  );
+  const [selectedTagIds, setSelectedTagIds] = useState(
+    initialValues?.tags.map((tag) => tag.id) ?? [],
   );
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -44,6 +53,7 @@ export function TaskForm({
     }
 
     nextTask.dueDate = getDefaultDueDate(dueDate);
+    nextTask.tagIds = selectedTagIds;
 
     onSubmitTask(nextTask);
   }
@@ -72,6 +82,13 @@ export function TaskForm({
           rows={3}
         />
       </div>
+
+      <TagPicker
+        tags={tags}
+        selectedTagIds={selectedTagIds}
+        onAddTag={onAddTag}
+        onChange={setSelectedTagIds}
+      />
 
       <div className="form-row">
         <div className="form-field">

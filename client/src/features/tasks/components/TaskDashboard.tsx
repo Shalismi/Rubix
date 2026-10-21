@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { CalendarPanel } from "./CalendarPanel";
 import { TaskForm } from "./TaskForm";
 import { TaskSection } from "./TaskSection";
+import { TagFilter } from "../../tags/components/TagFilter";
+import { TagManager } from "../../tags/components/TagManager";
+import type { Tag, TagInput } from "../../tags/types";
 import type { NewTaskInput, Task } from "../types";
 import { getActiveTaskGroups } from "../utils/taskGroups";
 
@@ -59,6 +62,10 @@ type TaskDashboardProps = {
   isLoadingTasks: boolean;
   selectedTaskId: number | null;
   taskError: string | null;
+  tags: Tag[];
+  selectedTagIds: number[];
+  isLoadingTags: boolean;
+  tagError: string | null;
   onAddTask: (task: NewTaskInput) => void;
   onCancelAddTask: () => void;
   onCancelEditTask: () => void;
@@ -69,20 +76,38 @@ type TaskDashboardProps = {
   onToggleAddTask: () => void;
   onToggleTaskCompleted: (taskId: number) => void;
   onUpdateTask: (taskId: number, task: NewTaskInput) => void;
+  onSelectedTagIdsChange: (tagIds: number[]) => void;
+  onAddTag: (tag: TagInput) => Promise<Tag | null>;
+  onEditTag: (tagId: number, tag: TagInput) => Promise<Tag | null>;
+  onRemoveTag: (tagId: number) => Promise<boolean>;
 };
 
-function filterTasks(tasks: Task[], searchQuery: string) {
-  if (!searchQuery) {
+function filterTasks(
+  tasks: Task[],
+  searchQuery: string,
+  selectedTagIds: number[],
+) {
+  if (!searchQuery && selectedTagIds.length === 0) {
     return tasks;
   }
 
   return tasks.filter((task) => {
-    const searchableTaskText = [task.title, task.description, task.dueDate]
+    const searchableTaskText = [
+      task.title,
+      task.description,
+      task.dueDate,
+      ...task.tags.map((tag) => tag.name),
+    ]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
+    const matchesSearch =
+      !searchQuery || searchableTaskText.includes(searchQuery);
+    const matchesTags =
+      selectedTagIds.length === 0 ||
+      task.tags.some((tag) => selectedTagIds.includes(tag.id));
 
-    return searchableTaskText.includes(searchQuery);
+    return matchesSearch && matchesTags;
   });
 }
 
@@ -95,6 +120,10 @@ export function TaskDashboard({
   isLoadingTasks,
   selectedTaskId,
   taskError,
+  tags,
+  selectedTagIds,
+  isLoadingTags,
+  tagError,
   onAddTask,
   onCancelAddTask,
   onCancelEditTask,
@@ -105,6 +134,10 @@ export function TaskDashboard({
   onToggleAddTask,
   onToggleTaskCompleted,
   onUpdateTask,
+  onSelectedTagIdsChange,
+  onAddTag,
+  onEditTag,
+  onRemoveTag,
 }: TaskDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openSections, setOpenSections] = useState<OpenTaskSections>(() =>
@@ -112,19 +145,21 @@ export function TaskDashboard({
   );
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const isSearching = normalizedSearchQuery.length > 0;
+  const isFilteringTags = selectedTagIds.length > 0;
+  const isNarrowingTasks = isSearching || isFilteringTags;
   const filteredActiveTasks = useMemo(
-    () => filterTasks(activeTasks, normalizedSearchQuery),
-    [activeTasks, normalizedSearchQuery],
+    () => filterTasks(activeTasks, normalizedSearchQuery, selectedTagIds),
+    [activeTasks, normalizedSearchQuery, selectedTagIds],
   );
   const filteredCompletedTasks = useMemo(
-    () => filterTasks(completedTasks, normalizedSearchQuery),
-    [completedTasks, normalizedSearchQuery],
+    () => filterTasks(completedTasks, normalizedSearchQuery, selectedTagIds),
+    [completedTasks, normalizedSearchQuery, selectedTagIds],
   );
   const activeTaskGroups = useMemo(
     () => getActiveTaskGroups(filteredActiveTasks),
     [filteredActiveTasks],
   );
-  const visibleActiveTaskGroups = isSearching
+  const visibleActiveTaskGroups = isNarrowingTasks
     ? activeTaskGroups.filter((taskGroup) => taskGroup.tasks.length > 0)
     : activeTaskGroups;
   const hasSearchResults =
@@ -186,6 +221,21 @@ export function TaskDashboard({
                 />
               </label>
 
+              <TagFilter
+                tags={tags}
+                selectedTagIds={selectedTagIds}
+                onChange={onSelectedTagIdsChange}
+              />
+
+              <TagManager
+                tags={tags}
+                isLoading={isLoadingTags}
+                error={tagError}
+                onAddTag={onAddTag}
+                onEditTag={onEditTag}
+                onRemoveTag={onRemoveTag}
+              />
+
               <button
                 className="primary-button"
                 type="button"
@@ -201,6 +251,8 @@ export function TaskDashboard({
             <TaskForm
               idPrefix="new-task"
               submitLabel="Add Task"
+              tags={tags}
+              onAddTag={onAddTag}
               onSubmitTask={onAddTask}
               onCancel={onCancelAddTask}
             />
@@ -223,6 +275,8 @@ export function TaskDashboard({
                     : taskGroup.emptyMessage
                 }
                 tasks={taskGroup.tasks}
+                availableTags={tags}
+                onAddTag={onAddTag}
                 hideHeader={isSearching}
                 variant={
                   taskGroup.id === "past-due"
@@ -254,11 +308,13 @@ export function TaskDashboard({
             );
           })}
 
-          {(!isSearching || filteredCompletedTasks.length > 0) && (
+          {(!isNarrowingTasks || filteredCompletedTasks.length > 0) && (
             <TaskSection
               title="Completed"
               emptyMessage="No completed tasks yet."
               tasks={filteredCompletedTasks}
+              availableTags={tags}
+              onAddTag={onAddTag}
               variant="completed"
               hideHeader={isSearching}
               isCollapsed={isSearching ? false : !openSections.completed}
@@ -275,14 +331,14 @@ export function TaskDashboard({
             />
           )}
 
-          {isSearching && !hasSearchResults && (
-            <p className="task-search-empty">No tasks match your search.</p>
+          {isNarrowingTasks && !hasSearchResults && (
+            <p className="task-search-empty">No tasks match these filters.</p>
           )}
         </section>
 
         <CalendarPanel
           selectedTaskId={selectedTaskId}
-          tasks={activeTasks}
+          tasks={filteredActiveTasks}
           onSelectTask={onSelectTask}
         />
       </div>

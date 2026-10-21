@@ -1,9 +1,12 @@
+import type { ApiTag } from "../tags/tagTypes.js";
+
 export type ApiTask = {
   id: number;
   title: string;
   description?: string;
   dueDate: string;
   completed: boolean;
+  tags: ApiTag[];
 };
 
 export type TaskInput = {
@@ -11,6 +14,7 @@ export type TaskInput = {
   description?: unknown;
   dueDate?: unknown;
   completed?: unknown;
+  tagIds?: unknown;
 };
 
 export type ValidationResult<T> = { data: T } | { error: string };
@@ -20,6 +24,7 @@ export type TaskCreateData = {
   description?: string;
   dueDate: string;
   completed: boolean;
+  tagIds: number[];
 };
 
 export type TaskUpdateData = {
@@ -27,4 +32,5 @@ export type TaskUpdateData = {
   description?: string | null;
   dueDate?: string;
   completed?: boolean;
+  tagIds?: number[];
 };

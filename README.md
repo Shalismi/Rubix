@@ -58,8 +58,8 @@ npm.cmd test
 ```
 
 The test command type-checks the server and tests, creates a separate
-`rubix_test` PostgreSQL database, verifies authentication and user-owned task
-behavior, and deletes the test database afterward. It does not modify the
+`rubix_test` PostgreSQL database, verifies authentication plus user-owned task
+and tag behavior, and deletes the test database afterward. It does not modify the
 development `rubix` database.
 
 ## Continuous Integration
