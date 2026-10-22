@@ -9,6 +9,14 @@ export type TagInput = {
   color?: unknown;
 };
 
+export type TagOrderInput = {
+  tagIds?: unknown;
+};
+
+export type TagPriorityInput = {
+  enabled?: unknown;
+};
+
 export type TagData = {
   name: string;
   normalizedName: string;

@@ -1,0 +1,77 @@
+.streak-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.05);
+}
+
+.streak-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.streak-header p {
+  margin: 0 0 0.25rem;
+  color: #667085;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.streak-header h2 {
+  margin: 0;
+  color: #101828;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.streak-header > span {
+  padding: 0.22rem 0.45rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.streak-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.streak-value strong {
+  color: #182230;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.streak-value span {
+  color: #667085;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.streak-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.streak-week span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid #d0d5dd;
+  border-radius: 50%;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 0.68rem;
+  font-weight: 800;
+}

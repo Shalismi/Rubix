@@ -6,6 +6,7 @@ export type Task = {
   description?: string;
   dueDate?: string;
   completed: boolean;
+  deletedAt: string | null;
   tags: Tag[];
 };
 

@@ -1,0 +1,230 @@
+.trash-view {
+  width: min(62rem, 100%);
+  padding-bottom: 3rem;
+}
+
+.trash-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 0;
+}
+
+.trash-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.trash-header h1 {
+  margin: 0;
+  color: #101828;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.trash-header p {
+  margin: 0.4rem 0 0;
+  color: #667085;
+  font-size: 0.95rem;
+}
+
+.trash-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.trash-sort-control {
+  display: grid;
+  gap: 0.25rem;
+  color: #475467;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.trash-sort-control select {
+  min-height: 2.75rem;
+  padding: 0 2rem 0 0.7rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.trash-sort-control select:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.16);
+  outline-offset: 2px;
+}
+
+.trash-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.trash-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(16, 24, 40, 0.05);
+}
+
+.trash-task-content {
+  min-width: 0;
+}
+
+.trash-task-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.trash-task-heading h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #344054;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.trash-expiration {
+  color: #b42318;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.trash-task-description {
+  margin: 0.35rem 0 0;
+  color: #667085;
+  font-size: 0.9rem;
+}
+
+.trash-task-meta,
+.trash-task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.55rem;
+}
+
+.trash-task-meta {
+  color: #667085;
+  font-size: 0.8rem;
+}
+
+.trash-task-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trash-restore-button,
+.trash-delete-button {
+  min-height: 2.35rem;
+  padding: 0 0.75rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.trash-restore-button {
+  color: #1d4ed8;
+}
+
+.trash-restore-button:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.trash-delete-button {
+  color: #b42318;
+}
+
+.trash-delete-button:hover {
+  border-color: #fda29b;
+  background: #fee4e2;
+}
+
+.trash-restore-button:focus-visible,
+.trash-delete-button:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  outline-offset: 2px;
+}
+
+.trash-empty-state,
+.trash-message {
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px dashed #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #667085;
+}
+
+.trash-empty-state h2 {
+  margin: 0;
+  color: #344054;
+  font-size: 1rem;
+}
+
+.trash-empty-state p {
+  margin: 0.35rem 0 0;
+}
+
+.trash-message.is-error {
+  border-color: #fda29b;
+  color: #b42318;
+}
+
+@media (max-width: 720px) {
+  .trash-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trash-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trash-sort-control select {
+    width: 100%;
+  }
+
+  .trash-task {
+    grid-template-columns: 1fr;
+  }
+
+  .trash-task-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 460px) {
+  .trash-task-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trash-restore-button,
+  .trash-delete-button {
+    width: 100%;
+  }
+}

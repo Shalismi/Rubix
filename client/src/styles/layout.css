@@ -4,7 +4,7 @@
 
 .app-shell {
   --page-gutter: clamp(1rem, 4vw, 2rem);
-  --sidebar-width: 17rem;
+  --sidebar-width: 18.5rem;
 
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
@@ -31,7 +31,7 @@
   min-height: 3rem;
   padding: 0 0.5rem;
   color: #111827;
-  font-size: 1.7rem;
+  font-size: 1.8rem;
   font-weight: 800;
 }
 
@@ -65,7 +65,7 @@
   color: #344054;
   cursor: pointer;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   font-weight: 750;
   text-align: left;
 }
@@ -113,7 +113,7 @@
   grid-template-columns: 2.4rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
-  min-width: min(100%, 20rem);
+  width: min(100%, 22rem);
   padding: 0.55rem 0.75rem;
   border: 1px solid #d0d5dd;
   border-radius: 8px;
@@ -207,8 +207,8 @@
 }
 
 .dashboard {
-  width: min(1180px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 0 0 3rem;
 }
 
@@ -220,7 +220,17 @@
 }
 
 .dashboard-card {
+  justify-self: center;
+  min-width: 0;
+  width: min(50rem, 100%);
   background: transparent;
+}
+
+.dashboard-rail {
+  display: grid;
+  align-content: start;
+  align-self: stretch;
+  gap: 1rem;
 }
 
 .dashboard-card-header {
@@ -247,6 +257,16 @@
 .dashboard-card-header .dashboard-error {
   color: #b42318;
   font-weight: 700;
+}
+
+@media (max-width: 1480px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px) {
@@ -283,6 +303,10 @@
   }
 
   .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-rail {
     grid-template-columns: 1fr;
   }
 }

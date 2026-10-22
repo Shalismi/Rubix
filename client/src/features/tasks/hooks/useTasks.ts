@@ -1,13 +1,38 @@
 import { useEffect, useState } from "react";
 import {
   createTask,
-  deleteTask as deleteTaskRequest,
   getTasks,
+  getTrashedTasks,
+  moveTaskToTrash,
+  permanentlyDeleteTask as permanentlyDeleteTaskRequest,
+  restoreTask as restoreTaskRequest,
   updateTask as updateTaskRequest,
 } from "../api/tasksApi";
 import type { NewTaskInput, Task } from "../types";
 import type { Tag } from "../../tags/types";
-import { getDefaultDueDate } from "../utils/date";
+import { compareDateValues, getDefaultDueDate } from "../utils/date";
+
+function sortTasks(tasks: Task[]) {
+  return [...tasks].sort((firstTask, secondTask) => {
+    if (firstTask.completed !== secondTask.completed) {
+      return Number(firstTask.completed) - Number(secondTask.completed);
+    }
+
+    if (firstTask.dueDate !== secondTask.dueDate) {
+      if (!firstTask.dueDate) {
+        return 1;
+      }
+
+      if (!secondTask.dueDate) {
+        return -1;
+      }
+
+      return compareDateValues(firstTask.dueDate, secondTask.dueDate);
+    }
+
+    return secondTask.id - firstTask.id;
+  });
+}
 
 function splitTasks(tasks: Task[]) {
   return {
@@ -34,13 +59,18 @@ function buildTaskInput(taskInput: NewTaskInput) {
 }
 
 function replaceTask(tasks: Task[], updatedTask: Task) {
-  return tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task));
+  return sortTasks(
+    tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+  );
 }
 
 export function useTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [trashedTasks, setTrashedTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+  const [isLoadingTrash, setIsLoadingTrash] = useState(true);
   const [taskError, setTaskError] = useState<string | null>(null);
+  const [trashError, setTrashError] = useState<string | null>(null);
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
@@ -49,7 +79,7 @@ export function useTasks() {
   useEffect(() => {
     getTasks()
       .then((serverTasks) => {
-        setTasks(serverTasks);
+        setTasks(sortTasks(serverTasks));
         setTaskError(null);
       })
       .catch(() => {
@@ -58,13 +88,25 @@ export function useTasks() {
       .finally(() => {
         setIsLoadingTasks(false);
       });
+
+    getTrashedTasks()
+      .then((serverTasks) => {
+        setTrashedTasks(serverTasks);
+        setTrashError(null);
+      })
+      .catch(() => {
+        setTrashError("Could not load deleted tasks from the server.");
+      })
+      .finally(() => {
+        setIsLoadingTrash(false);
+      });
   }, []);
 
   async function addTask(taskInput: NewTaskInput) {
     try {
       const createdTask = await createTask(buildTaskInput(taskInput));
 
-      setTasks((currentTasks) => [createdTask, ...currentTasks]);
+      setTasks((currentTasks) => sortTasks([...currentTasks, createdTask]));
       setIsAddingTask(false);
       setSelectedTaskId(createdTask.id);
       setTaskError(null);
@@ -75,10 +117,11 @@ export function useTasks() {
 
   async function deleteTask(taskId: number) {
     try {
-      await deleteTaskRequest(taskId);
+      const deletedTask = await moveTaskToTrash(taskId);
       setTasks((currentTasks) =>
         currentTasks.filter((task) => task.id !== taskId),
       );
+      setTrashedTasks((currentTasks) => [deletedTask, ...currentTasks]);
 
       if (editingTaskId === taskId) {
         setEditingTaskId(null);
@@ -90,7 +133,32 @@ export function useTasks() {
 
       setTaskError(null);
     } catch {
-      setTaskError("Could not delete task.");
+      setTaskError("Could not move task to Trash.");
+    }
+  }
+
+  async function restoreTask(taskId: number) {
+    try {
+      const restoredTask = await restoreTaskRequest(taskId);
+      setTrashedTasks((currentTasks) =>
+        currentTasks.filter((task) => task.id !== taskId),
+      );
+      setTasks((currentTasks) => sortTasks([...currentTasks, restoredTask]));
+      setTrashError(null);
+    } catch {
+      setTrashError("Could not restore task.");
+    }
+  }
+
+  async function permanentlyDeleteTask(taskId: number) {
+    try {
+      await permanentlyDeleteTaskRequest(taskId);
+      setTrashedTasks((currentTasks) =>
+        currentTasks.filter((task) => task.id !== taskId),
+      );
+      setTrashError(null);
+    } catch {
+      setTrashError("Could not permanently delete task.");
     }
   }
 
@@ -174,23 +242,27 @@ export function useTasks() {
   }
 
   function syncTag(updatedTag: Tag) {
-    setTasks((currentTasks) =>
+    const syncTagInTasks = (currentTasks: Task[]) =>
       currentTasks.map((task) => ({
         ...task,
         tags: task.tags.map((tag) =>
           tag.id === updatedTag.id ? updatedTag : tag,
         ),
-      })),
-    );
+      }));
+
+    setTasks(syncTagInTasks);
+    setTrashedTasks(syncTagInTasks);
   }
 
   function removeTag(tagId: number) {
-    setTasks((currentTasks) =>
+    const removeTagFromTasks = (currentTasks: Task[]) =>
       currentTasks.map((task) => ({
         ...task,
         tags: task.tags.filter((tag) => tag.id !== tagId),
-      })),
-    );
+      }));
+
+    setTasks(removeTagFromTasks);
+    setTrashedTasks(removeTagFromTasks);
   }
 
   return {
@@ -199,13 +271,18 @@ export function useTasks() {
     editingTaskId,
     isAddingTask,
     isLoadingTasks,
+    isLoadingTrash,
     selectedTaskId,
     taskError,
+    trashError,
+    trashedTasks,
     addTask,
     cancelAddTask,
     cancelEditingTask,
     clearSelectedTask,
     deleteTask,
+    permanentlyDeleteTask,
+    restoreTask,
     selectTask,
     startEditingTask,
     syncTag,

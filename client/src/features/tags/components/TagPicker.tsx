@@ -1,10 +1,10 @@
 import { useState, type KeyboardEvent } from "react";
 import { TagColorPicker } from "./TagColorPicker";
 import { TagPill } from "./TagPill";
+import { DEFAULT_TAG_COLOR } from "../constants";
 import { useDismissibleDetails } from "../hooks/useDismissibleDetails";
 import type { Tag, TagInput } from "../types";
 
-const DEFAULT_TAG_COLOR = "#2563EB";
 const MAX_TASK_TAGS = 10;
 
 type TagPickerProps = {

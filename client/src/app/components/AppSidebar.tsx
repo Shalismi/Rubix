@@ -1,14 +1,15 @@
-export type AppView = "dashboard" | "calendar" | "settings";
+export type AppView = "dashboard" | "calendar" | "trash" | "settings";
 
 type NavItem = {
   view?: AppView;
   label: string;
-  icon: "main" | "calendar" | "settings";
+  icon: "main" | "calendar" | "trash" | "settings";
 };
 
 const primaryNavItems: NavItem[] = [
   { label: "Dashboard", icon: "main", view: "dashboard" },
   { label: "Calendar", icon: "calendar", view: "calendar" },
+  { label: "Trash", icon: "trash", view: "trash" },
   { label: "Settings", icon: "settings", view: "settings" },
 ];
 
@@ -26,6 +27,14 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
       <svg aria-hidden="true" viewBox="0 0 24 24">
         <path d="M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
         <path d="M8 3v4M16 3v4M4 10h16" />
+      </svg>
+    );
+  }
+
+  if (icon === "trash") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+        <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
       </svg>
     );
   }

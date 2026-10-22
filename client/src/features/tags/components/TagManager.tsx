@@ -1,26 +1,33 @@
 import { useState, type FormEvent } from "react";
 import { TagColorPicker } from "./TagColorPicker";
 import { TagPill } from "./TagPill";
+import { DEFAULT_TAG_COLOR } from "../constants";
 import { useDismissibleDetails } from "../hooks/useDismissibleDetails";
-import type { Tag, TagInput } from "../types";
-
-const DEFAULT_TAG_COLOR = "#2563EB";
+import type { Tag, TagInput, TagMoveDirection } from "../types";
 
 type TagManagerProps = {
   tags: Tag[];
   isLoading: boolean;
+  isPriorityEnabled: boolean;
+  isSavingOrder: boolean;
   error: string | null;
   onAddTag: (tag: TagInput) => Promise<Tag | null>;
   onEditTag: (tagId: number, tag: TagInput) => Promise<Tag | null>;
+  onMoveTag: (tagId: number, direction: TagMoveDirection) => Promise<boolean>;
+  onPriorityEnabledChange: (enabled: boolean) => Promise<boolean>;
   onRemoveTag: (tagId: number) => Promise<boolean>;
 };
 
 export function TagManager({
   tags,
   isLoading,
+  isPriorityEnabled,
+  isSavingOrder,
   error,
   onAddTag,
   onEditTag,
+  onMoveTag,
+  onPriorityEnabledChange,
   onRemoveTag,
 }: TagManagerProps) {
   const detailsRef = useDismissibleDetails();
@@ -116,9 +123,21 @@ export function TagManager({
         )}
         {isLoading && <p className="tag-manager-status">Loading tags...</p>}
 
+        <label className="tag-priority-toggle">
+          <input
+            type="checkbox"
+            checked={isPriorityEnabled}
+            disabled={isLoading || isSavingOrder}
+            onChange={(event) =>
+              void onPriorityEnabledChange(event.target.checked)
+            }
+          />
+          <span>Sort tags by priority</span>
+        </label>
+
         {!isLoading && tags.length > 0 && (
           <div className="tag-manager-list">
-            {tags.map((tag) =>
+            {tags.map((tag, tagIndex) =>
               editingTagId === tag.id ? (
                 <div className="tag-edit-row" key={tag.id}>
                   <label>
@@ -148,7 +167,33 @@ export function TagManager({
                 </div>
               ) : (
                 <div className="tag-manager-row" key={tag.id}>
-                  <TagPill tag={tag} />
+                  <div className="tag-manager-row-main">
+                    {isPriorityEnabled && (
+                      <div className="tag-priority-buttons">
+                        <button
+                          type="button"
+                          title={`Move ${tag.name} up`}
+                          aria-label={`Move ${tag.name} up`}
+                          disabled={isSavingOrder || tagIndex === 0}
+                          onClick={() => void onMoveTag(tag.id, "up")}
+                        >
+                          {"\u2191"}
+                        </button>
+                        <button
+                          type="button"
+                          title={`Move ${tag.name} down`}
+                          aria-label={`Move ${tag.name} down`}
+                          disabled={
+                            isSavingOrder || tagIndex === tags.length - 1
+                          }
+                          onClick={() => void onMoveTag(tag.id, "down")}
+                        >
+                          {"\u2193"}
+                        </button>
+                      </div>
+                    )}
+                    <TagPill tag={tag} />
+                  </div>
                   <div>
                     <button type="button" onClick={() => beginEditing(tag)}>
                       Edit

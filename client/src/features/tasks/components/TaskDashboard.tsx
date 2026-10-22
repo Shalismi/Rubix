@@ -4,9 +4,11 @@ import { TaskForm } from "./TaskForm";
 import { TaskSection } from "./TaskSection";
 import { TagFilter } from "../../tags/components/TagFilter";
 import { TagManager } from "../../tags/components/TagManager";
-import type { Tag, TagInput } from "../../tags/types";
+import { StreakPanel } from "../../streaks/components/StreakPanel";
+import type { Tag, TagInput, TagMoveDirection } from "../../tags/types";
 import type { NewTaskInput, Task } from "../types";
 import { getActiveTaskGroups } from "../utils/taskGroups";
+import { filterTasksBySearchAndTags } from "../utils/taskFilters";
 
 type CollapsibleTaskSection = "today" | "upcoming" | "completed";
 type OpenTaskSections = Record<CollapsibleTaskSection, boolean>;
@@ -65,6 +67,8 @@ type TaskDashboardProps = {
   tags: Tag[];
   selectedTagIds: number[];
   isLoadingTags: boolean;
+  isTagPriorityEnabled: boolean;
+  isSavingTagOrder: boolean;
   tagError: string | null;
   onAddTask: (task: NewTaskInput) => void;
   onCancelAddTask: () => void;
@@ -79,37 +83,10 @@ type TaskDashboardProps = {
   onSelectedTagIdsChange: (tagIds: number[]) => void;
   onAddTag: (tag: TagInput) => Promise<Tag | null>;
   onEditTag: (tagId: number, tag: TagInput) => Promise<Tag | null>;
+  onMoveTag: (tagId: number, direction: TagMoveDirection) => Promise<boolean>;
+  onTagPriorityEnabledChange: (enabled: boolean) => Promise<boolean>;
   onRemoveTag: (tagId: number) => Promise<boolean>;
 };
-
-function filterTasks(
-  tasks: Task[],
-  searchQuery: string,
-  selectedTagIds: number[],
-) {
-  if (!searchQuery && selectedTagIds.length === 0) {
-    return tasks;
-  }
-
-  return tasks.filter((task) => {
-    const searchableTaskText = [
-      task.title,
-      task.description,
-      task.dueDate,
-      ...task.tags.map((tag) => tag.name),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    const matchesSearch =
-      !searchQuery || searchableTaskText.includes(searchQuery);
-    const matchesTags =
-      selectedTagIds.length === 0 ||
-      task.tags.some((tag) => selectedTagIds.includes(tag.id));
-
-    return matchesSearch && matchesTags;
-  });
-}
 
 export function TaskDashboard({
   userId,
@@ -123,6 +100,8 @@ export function TaskDashboard({
   tags,
   selectedTagIds,
   isLoadingTags,
+  isTagPriorityEnabled,
+  isSavingTagOrder,
   tagError,
   onAddTask,
   onCancelAddTask,
@@ -137,6 +116,8 @@ export function TaskDashboard({
   onSelectedTagIdsChange,
   onAddTag,
   onEditTag,
+  onMoveTag,
+  onTagPriorityEnabledChange,
   onRemoveTag,
 }: TaskDashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -148,11 +129,21 @@ export function TaskDashboard({
   const isFilteringTags = selectedTagIds.length > 0;
   const isNarrowingTasks = isSearching || isFilteringTags;
   const filteredActiveTasks = useMemo(
-    () => filterTasks(activeTasks, normalizedSearchQuery, selectedTagIds),
+    () =>
+      filterTasksBySearchAndTags(
+        activeTasks,
+        normalizedSearchQuery,
+        selectedTagIds,
+      ),
     [activeTasks, normalizedSearchQuery, selectedTagIds],
   );
   const filteredCompletedTasks = useMemo(
-    () => filterTasks(completedTasks, normalizedSearchQuery, selectedTagIds),
+    () =>
+      filterTasksBySearchAndTags(
+        completedTasks,
+        normalizedSearchQuery,
+        selectedTagIds,
+      ),
     [completedTasks, normalizedSearchQuery, selectedTagIds],
   );
   const activeTaskGroups = useMemo(
@@ -230,9 +221,13 @@ export function TaskDashboard({
               <TagManager
                 tags={tags}
                 isLoading={isLoadingTags}
+                isPriorityEnabled={isTagPriorityEnabled}
+                isSavingOrder={isSavingTagOrder}
                 error={tagError}
                 onAddTag={onAddTag}
                 onEditTag={onEditTag}
+                onMoveTag={onMoveTag}
+                onPriorityEnabledChange={onTagPriorityEnabledChange}
                 onRemoveTag={onRemoveTag}
               />
 
@@ -336,11 +331,14 @@ export function TaskDashboard({
           )}
         </section>
 
-        <CalendarPanel
-          selectedTaskId={selectedTaskId}
-          tasks={filteredActiveTasks}
-          onSelectTask={onSelectTask}
-        />
+        <div className="dashboard-rail">
+          <StreakPanel />
+          <CalendarPanel
+            selectedTaskId={selectedTaskId}
+            tasks={filteredActiveTasks}
+            onSelectTask={onSelectTask}
+          />
+        </div>
       </div>
     </main>
   );

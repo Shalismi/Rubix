@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../../../config/api";
+import { apiRequest } from "../../../shared/api/apiRequest";
 import type { NewTaskInput, Task, TaskUpdateInput } from "../types";
 
 type TasksResponse = {
@@ -9,35 +9,20 @@ type TaskResponse = {
   task: Task;
 };
 
-async function request<T>(path: string, options?: RequestInit) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-    ...options,
-  });
+export async function getTasks() {
+  const data = await apiRequest<TasksResponse>("/api/tasks");
 
-  if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return (await response.json()) as T;
+  return data.tasks;
 }
 
-export async function getTasks() {
-  const data = await request<TasksResponse>("/api/tasks");
+export async function getTrashedTasks() {
+  const data = await apiRequest<TasksResponse>("/api/tasks/trash");
 
   return data.tasks;
 }
 
 export async function createTask(task: NewTaskInput) {
-  const data = await request<TaskResponse>("/api/tasks", {
+  const data = await apiRequest<TaskResponse>("/api/tasks", {
     method: "POST",
     body: JSON.stringify(task),
   });
@@ -46,7 +31,7 @@ export async function createTask(task: NewTaskInput) {
 }
 
 export async function updateTask(taskId: number, task: TaskUpdateInput) {
-  const data = await request<TaskResponse>(`/api/tasks/${taskId}`, {
+  const data = await apiRequest<TaskResponse>(`/api/tasks/${taskId}`, {
     method: "PATCH",
     body: JSON.stringify(task),
   });
@@ -54,8 +39,24 @@ export async function updateTask(taskId: number, task: TaskUpdateInput) {
   return data.task;
 }
 
-export async function deleteTask(taskId: number) {
-  await request<void>(`/api/tasks/${taskId}`, {
+export async function moveTaskToTrash(taskId: number) {
+  const data = await apiRequest<TaskResponse>(`/api/tasks/${taskId}`, {
+    method: "DELETE",
+  });
+
+  return data.task;
+}
+
+export async function restoreTask(taskId: number) {
+  const data = await apiRequest<TaskResponse>(`/api/tasks/${taskId}/restore`, {
+    method: "PATCH",
+  });
+
+  return data.task;
+}
+
+export async function permanentlyDeleteTask(taskId: number) {
+  await apiRequest<void>(`/api/tasks/${taskId}/permanent`, {
     method: "DELETE",
   });
 }

@@ -6,6 +6,7 @@ export type ApiTask = {
   description?: string;
   dueDate: string;
   completed: boolean;
+  deletedAt: string | null;
   tags: ApiTag[];
 };
 

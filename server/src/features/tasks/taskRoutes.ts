@@ -4,6 +4,7 @@ import { asyncHandler } from "../../middleware/asyncHandler.js";
 import { requireAuth } from "../../middleware/requireAuth.js";
 import { serializeTask } from "./taskSerializer.js";
 import type { TaskInput } from "./taskTypes.js";
+import { purgeExpiredTasks } from "./trashService.js";
 import {
   buildTaskCreateData,
   buildTaskUpdateData,
@@ -37,8 +38,26 @@ taskRouter.get(
   "/",
   asyncHandler(async (req, res) => {
     const tasks = await prisma.task.findMany({
-      where: { userId: req.auth!.user.id },
+      where: { userId: req.auth!.user.id, deletedAt: null },
       orderBy: [{ completed: "asc" }, { dueDate: "asc" }, { id: "desc" }],
+      include: tagsInclude,
+    });
+
+    res.json({ tasks: tasks.map(serializeTask) });
+  }),
+);
+
+taskRouter.get(
+  "/trash",
+  asyncHandler(async (req, res) => {
+    await purgeExpiredTasks();
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: req.auth!.user.id,
+        deletedAt: { not: null },
+      },
+      orderBy: [{ deletedAt: "desc" }, { id: "desc" }],
       include: tagsInclude,
     });
 
@@ -79,6 +98,68 @@ taskRouter.post(
 );
 
 taskRouter.patch(
+  "/:id/restore",
+  asyncHandler(async (req, res) => {
+    await purgeExpiredTasks();
+
+    const taskId = parseTaskId(req.params.id);
+
+    if (taskId === null) {
+      res.status(400).json({ message: "Task id must be a number." });
+      return;
+    }
+
+    const deletedTask = await prisma.task.findFirst({
+      where: {
+        id: taskId,
+        userId: req.auth!.user.id,
+        deletedAt: { not: null },
+      },
+    });
+
+    if (!deletedTask) {
+      res.status(404).json({ message: "Deleted task not found." });
+      return;
+    }
+
+    const restoredTask = await prisma.task.update({
+      where: { id: taskId },
+      data: { deletedAt: null },
+      include: tagsInclude,
+    });
+
+    res.json({ task: serializeTask(restoredTask) });
+  }),
+);
+
+taskRouter.delete(
+  "/:id/permanent",
+  asyncHandler(async (req, res) => {
+    const taskId = parseTaskId(req.params.id);
+
+    if (taskId === null) {
+      res.status(400).json({ message: "Task id must be a number." });
+      return;
+    }
+
+    const deletedTasks = await prisma.task.deleteMany({
+      where: {
+        id: taskId,
+        userId: req.auth!.user.id,
+        deletedAt: { not: null },
+      },
+    });
+
+    if (deletedTasks.count === 0) {
+      res.status(404).json({ message: "Deleted task not found." });
+      return;
+    }
+
+    res.status(204).send();
+  }),
+);
+
+taskRouter.patch(
   "/:id",
   asyncHandler(async (req, res) => {
     const taskId = parseTaskId(req.params.id);
@@ -92,6 +173,7 @@ taskRouter.patch(
       where: {
         id: taskId,
         userId: req.auth!.user.id,
+        deletedAt: null,
       },
     });
 
@@ -148,6 +230,7 @@ taskRouter.delete(
       where: {
         id: taskId,
         userId: req.auth!.user.id,
+        deletedAt: null,
       },
     });
 
@@ -156,10 +239,12 @@ taskRouter.delete(
       return;
     }
 
-    await prisma.task.delete({
+    const deletedTask = await prisma.task.update({
       where: { id: taskId },
+      data: { deletedAt: new Date() },
+      include: tagsInclude,
     });
 
-    res.status(204).send();
+    res.json({ task: serializeTask(deletedTask) });
   }),
 );

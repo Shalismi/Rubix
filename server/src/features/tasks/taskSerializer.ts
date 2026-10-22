@@ -11,6 +11,7 @@ export function serializeTask(task: TaskWithTags): ApiTask {
     title: task.title,
     dueDate: task.dueDate,
     completed: task.completed,
+    deletedAt: task.deletedAt?.toISOString() ?? null,
     tags: task.taskTags.map(({ tag }) => ({
       id: tag.id,
       name: tag.name,

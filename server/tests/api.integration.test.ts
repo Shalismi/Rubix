@@ -38,6 +38,7 @@ type Task = {
   description?: string;
   dueDate: string;
   completed: boolean;
+  deletedAt: string | null;
   tags: Tag[];
 };
 
@@ -126,6 +127,7 @@ test("Rubix authentication and user-owned task flow", async (context) => {
   let secondUserCookie = "";
   let taskId = 0;
   let tagId = 0;
+  let secondTagId = 0;
 
   await context.test("enforces the complete password policy", async () => {
     const response = await request<{ message: string }>("/api/auth/register", {
@@ -182,6 +184,52 @@ test("Rubix authentication and user-owned task flow", async (context) => {
     assert.equal(createdTag.body?.tag.color, "#2563EB");
     tagId = createdTag.body!.tag.id;
 
+    const secondTag = await request<{ tag: Tag }>("/api/tags", {
+      method: "POST",
+      cookie: firstUserCookie,
+      body: { name: "Personal", color: "#16A34A" },
+    });
+
+    assert.equal(secondTag.status, 201);
+    secondTagId = secondTag.body!.tag.id;
+
+    const reorderedTags = await request<{ tags: Tag[] }>("/api/tags/order", {
+      method: "PATCH",
+      cookie: firstUserCookie,
+      body: { tagIds: [secondTagId, tagId] },
+    });
+    const creationOrderTags = await request<{
+      tags: Tag[];
+      priorityEnabled: boolean;
+    }>("/api/tags/priority", {
+      method: "PATCH",
+      cookie: firstUserCookie,
+      body: { enabled: false },
+    });
+    const priorityOrderTags = await request<{
+      tags: Tag[];
+      priorityEnabled: boolean;
+    }>("/api/tags/priority", {
+      method: "PATCH",
+      cookie: firstUserCookie,
+      body: { enabled: true },
+    });
+
+    assert.deepEqual(
+      reorderedTags.body?.tags.map((tag) => tag.name),
+      ["Personal", "Work"],
+    );
+    assert.equal(creationOrderTags.body?.priorityEnabled, false);
+    assert.deepEqual(
+      creationOrderTags.body?.tags.map((tag) => tag.name),
+      ["Work", "Personal"],
+    );
+    assert.equal(priorityOrderTags.body?.priorityEnabled, true);
+    assert.deepEqual(
+      priorityOrderTags.body?.tags.map((tag) => tag.name),
+      ["Personal", "Work"],
+    );
+
     const duplicateTag = await request<{ message: string }>("/api/tags", {
       method: "POST",
       cookie: firstUserCookie,
@@ -215,6 +263,7 @@ test("Rubix authentication and user-owned task flow", async (context) => {
 
     assert.equal(createdTask.status, 201);
     assert.equal(createdTask.body?.task.completed, false);
+    assert.equal(createdTask.body?.task.deletedAt, null);
     assert.deepEqual(createdTask.body?.task.tags, [
       { id: tagId, name: "Work", color: "#2563EB" },
     ]);
@@ -254,7 +303,7 @@ test("Rubix authentication and user-owned task flow", async (context) => {
     assert.equal(forbiddenTagUse.status, 400);
   });
 
-  await context.test("updates, completes, and deletes an owned task", async () => {
+  await context.test("updates, recycles, restores, and deletes an owned task", async () => {
     const updatedTask = await request<{ task: Task }>(`/api/tasks/${taskId}`, {
       method: "PATCH",
       cookie: firstUserCookie,
@@ -290,16 +339,99 @@ test("Rubix authentication and user-owned task flow", async (context) => {
     assert.equal(deletedTag.status, 204);
     assert.deepEqual(taskWithoutTag.body?.tasks[0]?.tags, []);
 
-    const deletedTask = await request(`/api/tasks/${taskId}`, {
+    const deletedTask = await request<{ task: Task }>(`/api/tasks/${taskId}`, {
       method: "DELETE",
       cookie: firstUserCookie,
     });
     const remainingTasks = await request<{ tasks: Task[] }>("/api/tasks", {
       cookie: firstUserCookie,
     });
+    const firstUserTrash = await request<{ tasks: Task[] }>(
+      "/api/tasks/trash",
+      { cookie: firstUserCookie },
+    );
+    const secondUserTrash = await request<{ tasks: Task[] }>(
+      "/api/tasks/trash",
+      { cookie: secondUserCookie },
+    );
 
-    assert.equal(deletedTask.status, 204);
+    assert.equal(deletedTask.status, 200);
+    assert.ok(deletedTask.body?.task.deletedAt);
     assert.equal(remainingTasks.body?.tasks.length, 0);
+    assert.equal(firstUserTrash.body?.tasks.length, 1);
+    assert.equal(secondUserTrash.body?.tasks.length, 0);
+
+    const forbiddenRestore = await request(`/api/tasks/${taskId}/restore`, {
+      method: "PATCH",
+      cookie: secondUserCookie,
+    });
+    const forbiddenPermanentDelete = await request(
+      `/api/tasks/${taskId}/permanent`,
+      { method: "DELETE", cookie: secondUserCookie },
+    );
+
+    assert.equal(forbiddenRestore.status, 404);
+    assert.equal(forbiddenPermanentDelete.status, 404);
+
+    const restoredTask = await request<{ task: Task }>(
+      `/api/tasks/${taskId}/restore`,
+      { method: "PATCH", cookie: firstUserCookie },
+    );
+    const restoredTasks = await request<{ tasks: Task[] }>("/api/tasks", {
+      cookie: firstUserCookie,
+    });
+    const emptyTrash = await request<{ tasks: Task[] }>("/api/tasks/trash", {
+      cookie: firstUserCookie,
+    });
+
+    assert.equal(restoredTask.status, 200);
+    assert.equal(restoredTask.body?.task.deletedAt, null);
+    assert.equal(restoredTasks.body?.tasks.length, 1);
+    assert.equal(emptyTrash.body?.tasks.length, 0);
+
+    const recycledAgain = await request(`/api/tasks/${taskId}`, {
+      method: "DELETE",
+      cookie: firstUserCookie,
+    });
+    const permanentlyDeleted = await request(
+      `/api/tasks/${taskId}/permanent`,
+      { method: "DELETE", cookie: firstUserCookie },
+    );
+    const trashAfterPermanentDelete = await request<{ tasks: Task[] }>(
+      "/api/tasks/trash",
+      { cookie: firstUserCookie },
+    );
+
+    assert.equal(recycledAgain.status, 200);
+    assert.equal(permanentlyDeleted.status, 204);
+    assert.equal(trashAfterPermanentDelete.body?.tasks.length, 0);
+
+    const expiringTask = await request<{ task: Task }>("/api/tasks", {
+      method: "POST",
+      cookie: firstUserCookie,
+      body: { title: "Expired trash task" },
+    });
+    const expiringTaskId = expiringTask.body!.task.id;
+
+    await request(`/api/tasks/${expiringTaskId}`, {
+      method: "DELETE",
+      cookie: firstUserCookie,
+    });
+    await prisma!.task.update({
+      where: { id: expiringTaskId },
+      data: { deletedAt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000) },
+    });
+
+    const trashAfterExpiration = await request<{ tasks: Task[] }>(
+      "/api/tasks/trash",
+      { cookie: firstUserCookie },
+    );
+    const expiredTask = await prisma!.task.findUnique({
+      where: { id: expiringTaskId },
+    });
+
+    assert.equal(trashAfterExpiration.body?.tasks.length, 0);
+    assert.equal(expiredTask, null);
   });
 
   await context.test(

@@ -8,6 +8,7 @@ import {
   getTodayDateValue,
   toDateValue,
 } from "../utils/date";
+import { filterTasksByTags } from "../utils/taskFilters";
 
 type TaskCalendarViewProps = {
   selectedTaskId: number | null;
@@ -71,12 +72,7 @@ export function TaskCalendarView({
   const tasksByDate = useMemo(() => {
     const nextTasksByDate = new Map<string, DatedTask[]>();
 
-    tasks
-      .filter(
-        (task) =>
-          selectedTagIds.length === 0 ||
-          task.tags.some((tag) => selectedTagIds.includes(tag.id)),
-      )
+    filterTasksByTags(tasks, selectedTagIds)
       .filter(hasDueDate)
       .sort((firstTask, secondTask) => {
         if (firstTask.completed !== secondTask.completed) {

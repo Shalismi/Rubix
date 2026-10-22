@@ -6,7 +6,9 @@ import "./styles/tasks.css";
 import "./styles/calendar.css";
 import "./styles/auth.css";
 import "./styles/settings.css";
+import "./styles/streaks.css";
 import "./styles/tags.css";
+import "./styles/trash.css";
 import { AppHeader } from "./app/components/AppHeader";
 import { AppSidebar, type AppView } from "./app/components/AppSidebar";
 import {
@@ -20,6 +22,7 @@ import { useTags } from "./features/tags/hooks/useTags";
 import type { TagInput } from "./features/tags/types";
 import { TaskCalendarView } from "./features/tasks/components/TaskCalendarView";
 import { TaskDashboard } from "./features/tasks/components/TaskDashboard";
+import { TrashView } from "./features/tasks/components/TrashView";
 import { useTasks } from "./features/tasks/hooks/useTasks";
 
 type AuthenticatedAppProps = {
@@ -79,6 +82,8 @@ function AuthenticatedApp({
         tags={tags.tags}
         selectedTagIds={selectedTagIds}
         isLoadingTags={tags.isLoadingTags}
+        isTagPriorityEnabled={tags.isPriorityEnabled}
+        isSavingTagOrder={tags.isSavingTagOrder}
         tagError={tags.tagError}
         onAddTask={tasks.addTask}
         onCancelAddTask={tasks.cancelAddTask}
@@ -93,6 +98,8 @@ function AuthenticatedApp({
         onSelectedTagIdsChange={setSelectedTagIds}
         onAddTag={tags.addTag}
         onEditTag={handleEditTag}
+        onMoveTag={tags.moveTag}
+        onTagPriorityEnabledChange={tags.changePriorityEnabled}
         onRemoveTag={handleRemoveTag}
       />
     );
@@ -105,6 +112,17 @@ function AuthenticatedApp({
         selectedTagIds={selectedTagIds}
         onSelectTask={tasks.selectTask}
         onSelectedTagIdsChange={setSelectedTagIds}
+      />
+    );
+  } else if (activeView === "trash") {
+    activeContent = (
+      <TrashView
+        tasks={tasks.trashedTasks}
+        tags={tags.tags}
+        isLoading={tasks.isLoadingTrash}
+        error={tasks.trashError}
+        onRestore={tasks.restoreTask}
+        onPermanentlyDelete={tasks.permanentlyDeleteTask}
       />
     );
   } else {
