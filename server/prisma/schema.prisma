@@ -10,8 +10,12 @@ datasource db {
 model User {
   id                 Int       @id @default(autoincrement())
   username           String    @unique
+  email              String?   @unique
+  emailVerifiedAt    DateTime? @map("email_verified_at")
   passwordHash       String    @map("password_hash")
+  recoveryCodeHash   String?   @map("recovery_code_hash")
   tagPriorityEnabled Boolean   @default(true) @map("tag_priority_enabled")
+  emailVerificationToken EmailVerificationToken?
   sessions           Session[]
   tasks              Task[]
   tags               Tag[]
@@ -19,6 +23,19 @@ model User {
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model EmailVerificationToken {
+  /// SHA-256 fingerprint of the random token sent by email.
+  id        String   @id
+  userId    Int      @unique @map("user_id")
+  email     String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("email_verification_tokens")
 }
 
 model Session {

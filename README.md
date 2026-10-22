@@ -38,6 +38,30 @@ Apply committed database migrations in production with:
 npm.cmd run db:migrate:deploy
 ```
 
+## Email Verification
+
+Email delivery is intentionally disabled while Rubix is a free portfolio
+project. Local development provides a direct verification link in Settings,
+and CI uses the same test-only flow to verify secure, expiring, single-use
+tokens without sending email.
+
+The deployed application accepts an optional, validly formatted email for
+sign-in but does not claim ownership verification or offer email-based
+password recovery. Those features require an email delivery provider and a
+verified sending domain.
+
+## Account Recovery
+
+Rubix provides password recovery without email through one-time recovery
+codes. New accounts receive a code once during registration. Signed-in users
+can replace their code from Settings after confirming their current password.
+A successful password reset replaces the used code and revokes every existing
+session for the account.
+
+Only a SHA-256 fingerprint of each recovery code is stored in PostgreSQL. The
+readable code cannot be retrieved later, so users who lose it must create a new
+one while they can still sign in.
+
 ## Database
 
 The server requires PostgreSQL and a local `server/.env` file based on
@@ -59,8 +83,8 @@ npm.cmd test
 
 The test command type-checks the server and tests, creates a separate
 `rubix_test` PostgreSQL database, verifies authentication plus user-owned task,
-tag ordering, and recycle-bin behavior, and deletes the test database afterward.
-It does not modify the development `rubix` database.
+tag ordering, recovery-code resets, and recycle-bin behavior, and deletes the
+test database afterward. It does not modify the development `rubix` database.
 
 ## Continuous Integration
 

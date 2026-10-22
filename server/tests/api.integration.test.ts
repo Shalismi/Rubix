@@ -29,7 +29,28 @@ type AuthResponse = {
   user: {
     id: number;
     username: string;
+    email: string | null;
+    emailVerified: boolean;
+    hasRecoveryCode: boolean;
   };
+};
+
+type RegistrationResponse = AuthResponse & {
+  recoveryCode: string;
+};
+
+type RecoveryCodeResponse = AuthResponse & {
+  recoveryCode: string;
+};
+
+type PasswordRecoveryResponse = {
+  message: string;
+  recoveryCode: string;
+};
+
+type VerificationRequestResponse = {
+  message: string;
+  developmentVerificationUrl?: string;
 };
 
 type Task = {
@@ -146,25 +167,302 @@ test("Rubix authentication and user-owned task flow", async (context) => {
   });
 
   await context.test("registers two independent users", async () => {
-    const firstUser = await request<AuthResponse>("/api/auth/register", {
+    const firstUser = await request<RegistrationResponse>("/api/auth/register", {
       method: "POST",
-      body: { username: "account_one", password: "StartingPass1" },
+      body: {
+        username: "account_one",
+        email: "Account.One@Example.com",
+        password: "StartingPass1",
+      },
     });
-    const secondUser = await request<AuthResponse>("/api/auth/register", {
+    const secondUser = await request<RegistrationResponse>("/api/auth/register", {
       method: "POST",
       body: { username: "account_two", password: "SecondPass2" },
     });
 
     assert.equal(firstUser.status, 201);
     assert.equal(firstUser.body?.user.username, "account_one");
+    assert.equal(firstUser.body?.user.email, "account.one@example.com");
+    assert.equal(firstUser.body?.user.emailVerified, false);
+    assert.equal(firstUser.body?.user.hasRecoveryCode, true);
+    assert.match(
+      firstUser.body?.recoveryCode ?? "",
+      /^[A-Z2-9]{4}(?:-[A-Z2-9]{4}){3}$/,
+    );
     assert.match(firstUser.cookie ?? "", /^rubix_session=/);
     assert.equal(secondUser.status, 201);
     assert.equal(secondUser.body?.user.username, "account_two");
+    assert.equal(secondUser.body?.user.email, null);
+    assert.equal(secondUser.body?.user.hasRecoveryCode, true);
     assert.match(secondUser.cookie ?? "", /^rubix_session=/);
 
     firstUserCookie = firstUser.cookie!;
     secondUserCookie = secondUser.cookie!;
   });
+
+  await context.test(
+    "supports optional email management and email sign-in",
+    async () => {
+      const noEmailVerification = await request<{ message: string }>(
+        "/api/auth/email/verification",
+        {
+          method: "POST",
+          cookie: secondUserCookie,
+        },
+      );
+      const emailLogin = await request<AuthResponse>("/api/auth/login", {
+        method: "POST",
+        body: {
+          identifier: "ACCOUNT.ONE@example.com",
+          password: "StartingPass1",
+        },
+      });
+      const duplicateRegistration = await request<{ message: string }>(
+        "/api/auth/register",
+        {
+          method: "POST",
+          body: {
+            username: "account_three",
+            email: "account.one@example.com",
+            password: "ThirdPass3",
+          },
+        },
+      );
+      const wrongPassword = await request<{ message: string }>(
+        "/api/auth/email",
+        {
+          method: "PATCH",
+          cookie: secondUserCookie,
+          body: {
+            email: "account.two@example.com",
+            currentPassword: "WrongPass9",
+          },
+        },
+      );
+      const duplicateEmail = await request<{ message: string }>(
+        "/api/auth/email",
+        {
+          method: "PATCH",
+          cookie: secondUserCookie,
+          body: {
+            email: "account.one@example.com",
+            currentPassword: "SecondPass2",
+          },
+        },
+      );
+      const emailChange = await request<AuthResponse>("/api/auth/email", {
+        method: "PATCH",
+        cookie: secondUserCookie,
+        body: {
+          email: "Account.Two@Example.com",
+          currentPassword: "SecondPass2",
+        },
+      });
+
+      assert.equal(noEmailVerification.status, 400);
+      assert.equal(emailLogin.status, 200);
+      assert.equal(emailLogin.body?.user.username, "account_one");
+      assert.equal(duplicateRegistration.status, 409);
+      assert.equal(
+        duplicateRegistration.body?.message,
+        "Email is already in use.",
+      );
+      assert.equal(wrongPassword.status, 400);
+      assert.equal(wrongPassword.body?.message, "Current password is incorrect.");
+      assert.equal(duplicateEmail.status, 409);
+      assert.equal(emailChange.status, 200);
+      assert.equal(emailChange.body?.user.email, "account.two@example.com");
+      assert.equal(emailChange.body?.user.emailVerified, false);
+    },
+  );
+
+  await context.test(
+    "verifies an email with an expiring single-use token",
+    async () => {
+      const verificationRequest =
+        await request<VerificationRequestResponse>(
+          "/api/auth/email/verification",
+          {
+            method: "POST",
+            cookie: firstUserCookie,
+          },
+        );
+      const duplicateRequest = await request<{ message: string }>(
+        "/api/auth/email/verification",
+        {
+          method: "POST",
+          cookie: firstUserCookie,
+        },
+      );
+      const verificationUrl = new URL(
+        verificationRequest.body!.developmentVerificationUrl!,
+      );
+      const token = verificationUrl.searchParams.get("token")!;
+      const verification = await request<{ message: string }>(
+        "/api/auth/email/verify",
+        {
+          method: "POST",
+          body: { token },
+        },
+      );
+      const verifiedSession = await request<AuthResponse>("/api/auth/me", {
+        cookie: firstUserCookie,
+      });
+      const replay = await request<{ message: string }>(
+        "/api/auth/email/verify",
+        {
+          method: "POST",
+          body: { token },
+        },
+      );
+
+      assert.equal(verificationRequest.status, 200);
+      assert.match(
+        verificationRequest.body?.developmentVerificationUrl ?? "",
+        /^http:\/\/localhost:5173\/verify-email\?token=/,
+      );
+      assert.equal(duplicateRequest.status, 429);
+      assert.equal(verification.status, 200);
+      assert.equal(verifiedSession.body?.user.emailVerified, true);
+      assert.equal(replay.status, 400);
+    },
+  );
+
+  await context.test(
+    "recovers a password with a one-time code and revokes sessions",
+    async () => {
+      const registration = await request<RegistrationResponse>(
+        "/api/auth/register",
+        {
+          method: "POST",
+          body: {
+            username: "recovery_account",
+            email: "recovery@example.com",
+            password: "RecoveryPass1",
+          },
+        },
+      );
+      const originalCode = registration.body!.recoveryCode;
+      const otherSession = await request<AuthResponse>("/api/auth/login", {
+        method: "POST",
+        body: {
+          identifier: "recovery_account",
+          password: "RecoveryPass1",
+        },
+      });
+      const unknownAccount = await request<{ message: string }>(
+        "/api/auth/password/recover",
+        {
+          method: "POST",
+          body: {
+            identifier: "missing_account",
+            recoveryCode: originalCode,
+            newPassword: "RecoveredPass2",
+          },
+        },
+      );
+      const wrongCode = await request<{ message: string }>(
+        "/api/auth/password/recover",
+        {
+          method: "POST",
+          body: {
+            identifier: "recovery_account",
+            recoveryCode: "AAAA-AAAA-AAAA-AAAA",
+            newPassword: "RecoveredPass2",
+          },
+        },
+      );
+      const recovered = await request<PasswordRecoveryResponse>(
+        "/api/auth/password/recover",
+        {
+          method: "POST",
+          body: {
+            identifier: "RECOVERY@EXAMPLE.COM",
+            recoveryCode: originalCode.toLowerCase(),
+            newPassword: "RecoveredPass2",
+          },
+        },
+      );
+
+      assert.equal(registration.status, 201);
+      assert.equal(unknownAccount.status, 400);
+      assert.equal(wrongCode.status, 400);
+      assert.equal(unknownAccount.body?.message, wrongCode.body?.message);
+      assert.equal(recovered.status, 200);
+      assert.match(
+        recovered.body?.recoveryCode ?? "",
+        /^[A-Z2-9]{4}(?:-[A-Z2-9]{4}){3}$/,
+      );
+      assert.notEqual(recovered.body?.recoveryCode, originalCode);
+
+      const firstRevokedSession = await request("/api/auth/me", {
+        cookie: registration.cookie!,
+      });
+      const secondRevokedSession = await request("/api/auth/me", {
+        cookie: otherSession.cookie!,
+      });
+      const oldPasswordLogin = await request("/api/auth/login", {
+        method: "POST",
+        body: {
+          identifier: "recovery_account",
+          password: "RecoveryPass1",
+        },
+      });
+      const newPasswordLogin = await request<AuthResponse>("/api/auth/login", {
+        method: "POST",
+        body: {
+          identifier: "recovery_account",
+          password: "RecoveredPass2",
+        },
+      });
+      const replayedCode = await request<{ message: string }>(
+        "/api/auth/password/recover",
+        {
+          method: "POST",
+          body: {
+            identifier: "recovery_account",
+            recoveryCode: originalCode,
+            newPassword: "AnotherPass3",
+          },
+        },
+      );
+
+      assert.equal(firstRevokedSession.status, 401);
+      assert.equal(secondRevokedSession.status, 401);
+      assert.equal(oldPasswordLogin.status, 401);
+      assert.equal(newPasswordLogin.status, 200);
+      assert.equal(replayedCode.status, 400);
+
+      const wrongCurrentPassword = await request<{ message: string }>(
+        "/api/auth/recovery-code",
+        {
+          method: "POST",
+          cookie: newPasswordLogin.cookie!,
+          body: { currentPassword: "WrongPass9" },
+        },
+      );
+      const replacedCode = await request<RecoveryCodeResponse>(
+        "/api/auth/recovery-code",
+        {
+          method: "POST",
+          cookie: newPasswordLogin.cookie!,
+          body: { currentPassword: "RecoveredPass2" },
+        },
+      );
+
+      assert.equal(wrongCurrentPassword.status, 400);
+      assert.equal(
+        wrongCurrentPassword.body?.message,
+        "Current password is incorrect.",
+      );
+      assert.equal(replacedCode.status, 200);
+      assert.equal(replacedCode.body?.user.hasRecoveryCode, true);
+      assert.notEqual(
+        replacedCode.body?.recoveryCode,
+        recovered.body?.recoveryCode,
+      );
+    },
+  );
 
   await context.test("requires a session for task access", async () => {
     const response = await request("/api/tasks");

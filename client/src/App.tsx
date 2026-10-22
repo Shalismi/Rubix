@@ -15,6 +15,9 @@ import {
   AuthLoadingScreen,
   AuthScreen,
 } from "./features/auth/components/AuthScreen";
+import { EmailVerificationScreen } from "./features/auth/components/EmailVerificationScreen";
+import { PasswordRecoveryScreen } from "./features/auth/components/PasswordRecoveryScreen";
+import { RecoveryCodeScreen } from "./features/auth/components/RecoveryCodeScreen";
 import { useAuth } from "./features/auth/hooks/useAuth";
 import type { AuthUser } from "./features/auth/types";
 import { AccountSettings } from "./features/settings/components/AccountSettings";
@@ -29,6 +32,7 @@ type AuthenticatedAppProps = {
   authError: string | null;
   isSigningOut: boolean;
   onSignOut: () => Promise<void>;
+  onUserChange: (user: AuthUser) => void;
   user: AuthUser;
 };
 
@@ -36,6 +40,7 @@ function AuthenticatedApp({
   authError,
   isSigningOut,
   onSignOut,
+  onUserChange,
   user,
 }: AuthenticatedAppProps) {
   const [activeView, setActiveView] = useState<AppView>("dashboard");
@@ -126,7 +131,9 @@ function AuthenticatedApp({
       />
     );
   } else {
-    activeContent = <AccountSettings username={user.username} />;
+    activeContent = (
+      <AccountSettings user={user} onUserChange={onUserChange} />
+    );
   }
 
   return (
@@ -149,6 +156,17 @@ function AuthenticatedApp({
 
 function App() {
   const auth = useAuth();
+  const isVerifyingEmail = window.location.pathname === "/verify-email";
+  const isRecoveringPassword =
+    window.location.pathname === "/forgot-password";
+
+  if (isVerifyingEmail) {
+    return <EmailVerificationScreen />;
+  }
+
+  if (isRecoveringPassword) {
+    return <PasswordRecoveryScreen />;
+  }
 
   if (auth.isCheckingSession) {
     return <AuthLoadingScreen />;
@@ -166,11 +184,21 @@ function App() {
     );
   }
 
+  if (auth.registrationRecoveryCode) {
+    return (
+      <RecoveryCodeScreen
+        code={auth.registrationRecoveryCode}
+        onContinue={auth.dismissRegistrationRecoveryCode}
+      />
+    );
+  }
+
   return (
     <AuthenticatedApp
       authError={auth.authError}
       isSigningOut={auth.isSubmitting}
       onSignOut={auth.logout}
+      onUserChange={auth.updateUser}
       user={auth.user}
     />
   );

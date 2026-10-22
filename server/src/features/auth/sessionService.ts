@@ -77,6 +77,9 @@ export async function getAuthSession(
         select: {
           id: true,
           username: true,
+          email: true,
+          emailVerifiedAt: true,
+          recoveryCodeHash: true,
         },
       },
     },

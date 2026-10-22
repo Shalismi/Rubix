@@ -102,6 +102,26 @@
   font-weight: 800;
 }
 
+.auth-field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.auth-field-label-row a,
+.auth-back-link {
+  color: #175cd3;
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.auth-field-label-row a:hover,
+.auth-back-link:hover {
+  text-decoration: underline;
+}
+
 .auth-field input {
   width: 100%;
   min-height: 2.85rem;
@@ -143,6 +163,17 @@
   margin-top: 0.25rem;
 }
 
+.auth-link-button {
+  display: block;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+}
+
+.auth-back-link {
+  justify-self: center;
+}
+
 .auth-loading {
   display: grid;
   justify-items: center;
@@ -159,6 +190,104 @@
   font-size: 0.9rem;
 }
 
+.verification-panel {
+  display: grid;
+  gap: 2rem;
+}
+
+.verification-result {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.verification-result h1,
+.verification-result p {
+  margin: 0;
+}
+
+.verification-result h1 {
+  font-size: 1.55rem;
+}
+
+.verification-result p {
+  color: #667085;
+  line-height: 1.5;
+}
+
+.verification-symbol {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  font-weight: 850;
+}
+
+.verification-symbol.is-checking {
+  background: #eff4ff;
+  color: #175cd3;
+}
+
+.verification-symbol.is-success {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.verification-symbol.is-error {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.verification-action {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.recovery-panel {
+  display: grid;
+}
+
+.recovery-code-block {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.recovery-code-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding: 0.8rem 0;
+  border-top: 1px solid #e4e7ec;
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.recovery-code-value code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #101828;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.recovery-code-value button {
+  flex: 0 0 auto;
+}
+
+.recovery-code-status {
+  min-height: 2.4em;
+  margin: 0;
+  color: #667085;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 520px) {
   .auth-shell {
     align-items: start;
@@ -168,5 +297,10 @@
   .auth-panel {
     margin-top: 1rem;
     padding: 1.4rem;
+  }
+
+  .recovery-code-value {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

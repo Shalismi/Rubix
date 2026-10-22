@@ -5,7 +5,11 @@ import {
   logout as logoutRequest,
   register as registerRequest,
 } from "../api/authApi";
-import type { AuthCredentials, AuthUser } from "../types";
+import type {
+  AuthUser,
+  LoginCredentials,
+  RegistrationCredentials,
+} from "../types";
 
 function getMessage(error: unknown) {
   return error instanceof Error
@@ -18,6 +22,9 @@ export function useAuth() {
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [registrationRecoveryCode, setRegistrationRecoveryCode] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     let isActive = true;
@@ -44,15 +51,13 @@ export function useAuth() {
     };
   }, []);
 
-  async function runAuthRequest(
-    request: (credentials: AuthCredentials) => Promise<AuthUser>,
-    credentials: AuthCredentials,
-  ) {
+  async function login(credentials: LoginCredentials) {
     setIsSubmitting(true);
     setAuthError(null);
 
     try {
-      const authenticatedUser = await request(credentials);
+      const authenticatedUser = await loginRequest(credentials);
+      setRegistrationRecoveryCode(null);
       setUser(authenticatedUser);
     } catch (error) {
       setAuthError(getMessage(error));
@@ -61,12 +66,19 @@ export function useAuth() {
     }
   }
 
-  function login(credentials: AuthCredentials) {
-    return runAuthRequest(loginRequest, credentials);
-  }
+  async function register(credentials: RegistrationCredentials) {
+    setIsSubmitting(true);
+    setAuthError(null);
 
-  function register(credentials: AuthCredentials) {
-    return runAuthRequest(registerRequest, credentials);
+    try {
+      const result = await registerRequest(credentials);
+      setRegistrationRecoveryCode(result.recoveryCode);
+      setUser(result.user);
+    } catch (error) {
+      setAuthError(getMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   async function logout() {
@@ -75,6 +87,7 @@ export function useAuth() {
 
     try {
       await logoutRequest();
+      setRegistrationRecoveryCode(null);
       setUser(null);
     } catch (error) {
       setAuthError(getMessage(error));
@@ -87,10 +100,14 @@ export function useAuth() {
     authError,
     isCheckingSession,
     isSubmitting,
+    registrationRecoveryCode,
     user,
     clearAuthError: () => setAuthError(null),
+    dismissRegistrationRecoveryCode: () =>
+      setRegistrationRecoveryCode(null),
     login,
     logout,
     register,
+    updateUser: setUser,
   };
 }

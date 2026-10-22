@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import type { AuthCredentials } from "../types";
+import type { LoginCredentials, RegistrationCredentials } from "../types";
 import {
   getPasswordPolicyError,
   PASSWORD_REQUIREMENTS,
@@ -11,8 +11,8 @@ type AuthScreenProps = {
   error: string | null;
   isSubmitting: boolean;
   onClearError: () => void;
-  onLogin: (credentials: AuthCredentials) => Promise<void>;
-  onRegister: (credentials: AuthCredentials) => Promise<void>;
+  onLogin: (credentials: LoginCredentials) => Promise<void>;
+  onRegister: (credentials: RegistrationCredentials) => Promise<void>;
 };
 
 export function AuthScreen({
@@ -23,7 +23,8 @@ export function AuthScreen({
   onRegister,
 }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>("login");
-  const [username, setUsername] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
@@ -31,6 +32,8 @@ export function AuthScreen({
 
   function selectMode(nextMode: AuthMode) {
     setMode(nextMode);
+    setIdentifier("");
+    setEmail("");
     setPassword("");
     setConfirmPassword("");
     setFormError(null);
@@ -56,14 +59,16 @@ export function AuthScreen({
       }
     }
 
-    const credentials = { username, password };
-
     if (isRegistering) {
-      await onRegister(credentials);
+      await onRegister({
+        username: identifier,
+        ...(email.trim() ? { email } : {}),
+        password,
+      });
       return;
     }
 
-    await onLogin(credentials);
+    await onLogin({ identifier, password });
   }
 
   return (
@@ -108,24 +113,46 @@ export function AuthScreen({
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="auth-field">
-            <label htmlFor="auth-username">Username</label>
+            <label htmlFor="auth-identifier">
+              {isRegistering ? "Username" : "Username or email"}
+            </label>
             <input
               autoComplete="username"
               autoFocus
-              id="auth-username"
-              maxLength={30}
+              id="auth-identifier"
+              maxLength={isRegistering ? 30 : 254}
               minLength={3}
-              onChange={(event) => setUsername(event.target.value)}
-              pattern="[A-Za-z0-9_]+"
-              placeholder="your_username"
+              onChange={(event) => setIdentifier(event.target.value)}
+              pattern={isRegistering ? "[A-Za-z0-9_]+" : undefined}
+              placeholder={isRegistering ? "your_username" : "Username or email"}
               required
               type="text"
-              value={username}
+              value={identifier}
             />
           </div>
 
+          {isRegistering ? (
+            <div className="auth-field">
+              <label htmlFor="auth-email">Email (optional)</label>
+              <input
+                autoComplete="email"
+                id="auth-email"
+                maxLength={254}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                type="email"
+                value={email}
+              />
+            </div>
+          ) : null}
+
           <div className="auth-field">
-            <label htmlFor="auth-password">Password</label>
+            <div className="auth-field-label-row">
+              <label htmlFor="auth-password">Password</label>
+              {!isRegistering ? (
+                <a href="/forgot-password">Forgot password?</a>
+              ) : null}
+            </div>
             <input
               autoComplete={isRegistering ? "new-password" : "current-password"}
               id="auth-password"

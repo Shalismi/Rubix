@@ -13,15 +13,26 @@ import {
   setSessionCookie,
 } from "./sessionService.js";
 import type {
-  AuthInput,
   AuthUser,
+  EmailChangeInput,
+  LoginInput,
   PasswordChangeInput,
+  PasswordRecoveryInput,
+  RecoveryCodeChangeInput,
+  RegistrationInput,
 } from "./authTypes.js";
 import {
+  validateEmailChangeInput,
   validateLoginInput,
   validatePasswordChangeInput,
+  validatePasswordRecoveryInput,
+  validateRecoveryCodeChangeInput,
   validateRegistrationInput,
 } from "./authValidation.js";
+import {
+  createRecoveryCode,
+  isRecoveryCodeValid,
+} from "./recoveryCodeService.js";
 
 export const authRouter = Router();
 
@@ -33,10 +44,21 @@ const authRateLimit = rateLimit({
   message: { message: "Too many authentication attempts. Try again later." },
 });
 
+const recoveryRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many recovery attempts. Try again later." },
+});
+
 function serializeUser(user: AuthUser) {
   return {
     id: user.id,
     username: user.username,
+    email: user.email,
+    emailVerified: user.emailVerifiedAt !== null,
+    hasRecoveryCode: user.recoveryCodeHash !== null,
   };
 }
 
@@ -49,7 +71,9 @@ authRouter.post(
   "/register",
   authRateLimit,
   asyncHandler(async (request, response) => {
-    const credentials = validateRegistrationInput(request.body as AuthInput);
+    const credentials = validateRegistrationInput(
+      request.body as RegistrationInput,
+    );
 
     if ("error" in credentials) {
       response.status(400).json({ message: credentials.error });
@@ -57,28 +81,48 @@ authRouter.post(
     }
 
     const passwordHash = await hashPassword(credentials.data.password);
+    const recoveryCode = createRecoveryCode();
 
     try {
       const user = await prisma.user.create({
         data: {
           username: credentials.data.username,
+          email: credentials.data.email,
           passwordHash,
+          recoveryCodeHash: recoveryCode.hash,
         },
         select: {
           id: true,
           username: true,
+          email: true,
+          emailVerifiedAt: true,
+          recoveryCodeHash: true,
         },
       });
       const session = await createSession(user.id);
 
       setSessionCookie(response, session.token, session.expiresAt);
-      response.status(201).json({ user: serializeUser(user) });
+      response.status(201).json({
+        user: serializeUser(user),
+        recoveryCode: recoveryCode.code,
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2002"
       ) {
-        response.status(409).json({ message: "Username is already taken." });
+        const emailTaken = credentials.data.email
+          ? await prisma.user.findUnique({
+              where: { email: credentials.data.email },
+              select: { id: true },
+            })
+          : null;
+
+        response.status(409).json({
+          message: emailTaken
+            ? "Email is already in use."
+            : "Username is already taken.",
+        });
         return;
       }
 
@@ -91,20 +135,29 @@ authRouter.post(
   "/login",
   authRateLimit,
   asyncHandler(async (request, response) => {
-    const credentials = validateLoginInput(request.body as AuthInput);
+    const credentials = validateLoginInput(request.body as LoginInput);
 
     if ("error" in credentials) {
-      response.status(401).json({ message: "Invalid username or password." });
+      response
+        .status(401)
+        .json({ message: "Invalid username/email or password." });
       return;
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username: credentials.data.username },
-    });
+    const user =
+      credentials.data.identifierType === "email"
+        ? await prisma.user.findUnique({
+            where: { email: credentials.data.identifier },
+          })
+        : await prisma.user.findUnique({
+            where: { username: credentials.data.identifier },
+          });
 
     if (!user) {
       await hashPassword(credentials.data.password);
-      response.status(401).json({ message: "Invalid username or password." });
+      response
+        .status(401)
+        .json({ message: "Invalid username/email or password." });
       return;
     }
 
@@ -114,7 +167,9 @@ authRouter.post(
     );
 
     if (!isPasswordValid) {
-      response.status(401).json({ message: "Invalid username or password." });
+      response
+        .status(401)
+        .json({ message: "Invalid username/email or password." });
       return;
     }
 
@@ -144,6 +199,95 @@ authRouter.get(
   requireAuth,
   asyncHandler(async (request, response) => {
     response.json({ user: serializeUser(request.auth!.user) });
+  }),
+);
+
+authRouter.patch(
+  "/email",
+  authRateLimit,
+  requireAuth,
+  asyncHandler(async (request, response) => {
+    const emailChange = validateEmailChangeInput(
+      request.body as EmailChangeInput,
+    );
+
+    if ("error" in emailChange) {
+      response.status(400).json({ message: emailChange.error });
+      return;
+    }
+
+    const account = await prisma.user.findUnique({
+      where: { id: request.auth!.user.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        emailVerifiedAt: true,
+        passwordHash: true,
+        recoveryCodeHash: true,
+      },
+    });
+
+    if (!account) {
+      clearSessionCookie(response);
+      response.status(401).json({ message: "Authentication required." });
+      return;
+    }
+
+    const isCurrentPasswordValid = await verifyPassword(
+      account.passwordHash,
+      emailChange.data.currentPassword,
+    );
+
+    if (!isCurrentPasswordValid) {
+      response.status(400).json({ message: "Current password is incorrect." });
+      return;
+    }
+
+    if (account.email === emailChange.data.email) {
+      response.json({ user: serializeUser(account) });
+      return;
+    }
+
+    try {
+      const [user] = await prisma.$transaction([
+        prisma.user.update({
+          where: { id: account.id },
+          data: {
+            email: emailChange.data.email,
+            emailVerifiedAt: null,
+          },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            emailVerifiedAt: true,
+            recoveryCodeHash: true,
+          },
+        }),
+        prisma.session.deleteMany({
+          where: {
+            userId: account.id,
+            id: { not: request.auth!.sessionId },
+          },
+        }),
+        prisma.emailVerificationToken.deleteMany({
+          where: { userId: account.id },
+        }),
+      ]);
+
+      response.json({ user: serializeUser(user) });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        response.status(409).json({ message: "Email is already in use." });
+        return;
+      }
+
+      throw error;
+    }
   }),
 );
 
@@ -205,5 +349,122 @@ authRouter.patch(
     ]);
 
     response.status(204).send();
+  }),
+);
+
+authRouter.post(
+  "/recovery-code",
+  recoveryRateLimit,
+  requireAuth,
+  asyncHandler(async (request, response) => {
+    const recoveryCodeChange = validateRecoveryCodeChangeInput(
+      request.body as RecoveryCodeChangeInput,
+    );
+
+    if ("error" in recoveryCodeChange) {
+      response.status(400).json({ message: recoveryCodeChange.error });
+      return;
+    }
+
+    const account = await prisma.user.findUnique({
+      where: { id: request.auth!.user.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        emailVerifiedAt: true,
+        passwordHash: true,
+        recoveryCodeHash: true,
+      },
+    });
+
+    if (!account) {
+      clearSessionCookie(response);
+      response.status(401).json({ message: "Authentication required." });
+      return;
+    }
+
+    const isCurrentPasswordValid = await verifyPassword(
+      account.passwordHash,
+      recoveryCodeChange.data.currentPassword,
+    );
+
+    if (!isCurrentPasswordValid) {
+      response.status(400).json({ message: "Current password is incorrect." });
+      return;
+    }
+
+    const recoveryCode = createRecoveryCode();
+    const user = await prisma.user.update({
+      where: { id: account.id },
+      data: { recoveryCodeHash: recoveryCode.hash },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        emailVerifiedAt: true,
+        recoveryCodeHash: true,
+      },
+    });
+
+    response.json({
+      user: serializeUser(user),
+      recoveryCode: recoveryCode.code,
+    });
+  }),
+);
+
+authRouter.post(
+  "/password/recover",
+  recoveryRateLimit,
+  asyncHandler(async (request, response) => {
+    const recovery = validatePasswordRecoveryInput(
+      request.body as PasswordRecoveryInput,
+    );
+
+    if ("error" in recovery) {
+      response.status(400).json({ message: recovery.error });
+      return;
+    }
+
+    const account =
+      recovery.data.identifierType === "email"
+        ? await prisma.user.findUnique({
+            where: { email: recovery.data.identifier },
+            select: { id: true, recoveryCodeHash: true },
+          })
+        : await prisma.user.findUnique({
+            where: { username: recovery.data.identifier },
+            select: { id: true, recoveryCodeHash: true },
+          });
+    const passwordHash = await hashPassword(recovery.data.newPassword);
+    const isCodeValid = isRecoveryCodeValid(
+      recovery.data.recoveryCode,
+      account?.recoveryCodeHash,
+    );
+
+    if (!account || !isCodeValid) {
+      response.status(400).json({ message: "Recovery details are invalid." });
+      return;
+    }
+
+    const replacementCode = createRecoveryCode();
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: account.id },
+        data: {
+          passwordHash,
+          recoveryCodeHash: replacementCode.hash,
+        },
+      }),
+      prisma.session.deleteMany({ where: { userId: account.id } }),
+    ]);
+
+    clearSessionCookie(response);
+    response.json({
+      message: "Password reset successfully.",
+      recoveryCode: replacementCode.code,
+    });
   }),
 );
