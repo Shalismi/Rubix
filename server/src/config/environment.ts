@@ -6,6 +6,10 @@ const DEFAULT_PORT = 5000;
 const nodeEnvironment = process.env.NODE_ENV?.trim() || "development";
 const isProduction = nodeEnvironment === "production";
 
+function isLoopbackHostname(hostname: string) {
+  return ["localhost", "127.0.0.1", "[::1]"].includes(hostname);
+}
+
 function getClientOrigin() {
   const configuredOrigin =
     process.env.CLIENT_ORIGIN?.trim() ||
@@ -42,11 +46,38 @@ function getClientOrigin() {
     );
   }
 
-  if (isProduction && url.protocol !== "https:") {
+  if (
+    isProduction &&
+    url.protocol !== "https:" &&
+    !isLoopbackHostname(url.hostname)
+  ) {
     throw new Error("CLIENT_ORIGIN must use https in production.");
   }
 
   return url.origin;
+}
+
+function getSecureCookies(clientOrigin: string) {
+  const configuredValue = process.env.COOKIE_SECURE?.trim().toLowerCase();
+
+  if (!configuredValue) {
+    return isProduction;
+  }
+
+  if (!["true", "false"].includes(configuredValue)) {
+    throw new Error("COOKIE_SECURE must be true or false.");
+  }
+
+  const secureCookies = configuredValue === "true";
+  const clientHostname = new URL(clientOrigin).hostname;
+
+  if (isProduction && !secureCookies && !isLoopbackHostname(clientHostname)) {
+    throw new Error(
+      "COOKIE_SECURE can only be false for a loopback production origin.",
+    );
+  }
+
+  return secureCookies;
 }
 
 function getPort() {
@@ -59,9 +90,12 @@ function getPort() {
   return port;
 }
 
+const clientOrigin = getClientOrigin();
+
 export const environment = Object.freeze({
-  clientOrigin: getClientOrigin(),
+  clientOrigin,
   isProduction,
   nodeEnvironment,
   port: getPort(),
+  secureCookies: getSecureCookies(clientOrigin),
 });

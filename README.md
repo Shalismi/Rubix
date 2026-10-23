@@ -1,5 +1,7 @@
 # Rubix
 
+[![CI](https://github.com/Shalismi/Rubix/actions/workflows/ci.yml/badge.svg)](https://github.com/Shalismi/Rubix/actions/workflows/ci.yml)
+
 Rubix is a full-stack task management application built with React,
 TypeScript, Express, PostgreSQL, and Prisma.
 
@@ -7,15 +9,17 @@ Live app: [https://rubix-feqe.onrender.com](https://rubix-feqe.onrender.com)
 
 ## Run Locally
 
-Start the API from `C:\Mushroom\Rubix\server`:
+Start the API from the repository root:
 
 ```powershell
+cd server
 npm.cmd run dev
 ```
 
-Start the React client from `C:\Mushroom\Rubix\client`:
+In another terminal, start the React client:
 
 ```powershell
+cd client
 npm.cmd run dev
 ```
 
@@ -27,6 +31,39 @@ The client can read its API address from `VITE_API_URL`. Local development uses
 client uses the same origin as the API, so this variable is optional. Values
 whose names begin with `VITE_` are visible in browser code and must not contain
 passwords or other secrets.
+
+## Run With Docker
+
+Docker runs the compiled Rubix application and an isolated PostgreSQL 18
+database. From the repository root, start the stack with:
+
+```powershell
+docker compose up --build
+```
+
+Open `http://localhost:8080`. The `migrations` service applies every committed
+Prisma migration before the app starts, and the named `postgres_data` volume
+keeps local Docker data between restarts.
+
+Stop the stack with:
+
+```powershell
+docker compose down
+```
+
+To also delete the Docker database and start empty, use:
+
+```powershell
+docker compose down --volumes
+```
+
+The Docker database is separate from the PostgreSQL installation on the host
+and from the production Supabase database.
+
+- `Dockerfile` builds the frontend and server into the production app image.
+- `compose.yaml` starts the app, database, and database migrations together.
+- `.dockerignore` keeps secrets, dependencies, and build output out of the
+  image build context.
 
 For production hosting, configure the server with `DATABASE_URL` and
 `NODE_ENV=production`. Render provides the HTTPS origin and `PORT`
@@ -68,14 +105,14 @@ The server requires PostgreSQL and a local `server/.env` file based on
 `server/.env.example`. Apply committed schema changes with:
 
 ```powershell
-cd C:\Mushroom\Rubix\server
+cd server
 npm.cmd run db:generate
 npm.cmd run db:migrate
 ```
 
 ## Automated Tests
 
-Run the server integration suite from `C:\Mushroom\Rubix\server`:
+Run the server integration suite from the `server` directory:
 
 ```powershell
 npm.cmd test
@@ -91,11 +128,22 @@ test database afterward. It does not modify the development `rubix` database.
 GitHub Actions runs the client lint/build checks and the server test/build
 checks whenever code is pushed to `main` or included in a pull request to
 `main`. The server job uses a temporary PostgreSQL database hosted inside the
-GitHub Actions runner.
+GitHub Actions runner. A separate Docker job validates `compose.yaml` and
+builds the production image without publishing it.
 
 CI verifies the project automatically, but it does not publish the application
 to the internet. Hosting the client, API, and production database is a separate
 deployment step.
+
+## Secrets And Configuration
+
+Local database credentials belong in `server/.env`, which Git ignores. The
+tracked `server/.env.example` contains only placeholders. Production secrets,
+such as `DATABASE_URL`, belong in the Render Environment page and must never be
+added to source files or variables whose names start with `VITE_`.
+
+The password in `compose.yaml` is only for the isolated local Docker database.
+That database does not publish its port and is not used by Render or Supabase.
 
 ## Render Deployment
 

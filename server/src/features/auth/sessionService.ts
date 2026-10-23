@@ -5,14 +5,14 @@ import { prisma } from "../../db/prisma.js";
 import type { AuthSession } from "./authTypes.js";
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
-const SESSION_COOKIE_NAME = environment.isProduction
+const SESSION_COOKIE_NAME = environment.secureCookies
   ? "__Host-rubix_session"
   : "rubix_session";
 
 const sessionCookieOptions: CookieOptions = {
   httpOnly: true,
   sameSite: "lax",
-  secure: environment.isProduction,
+  secure: environment.secureCookies,
   path: "/",
 };
 

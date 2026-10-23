@@ -6,6 +6,21 @@ Rubix is split into a React client and an Express/PostgreSQL server.
 Provides the root build and start commands used by Render to deploy both apps
 as one web service.
 
+`Dockerfile`
+Builds the React client and Express server, then copies only their production
+output and server runtime dependencies into the final image.
+
+`compose.yaml`
+Runs the production image with an isolated local PostgreSQL database and a
+one-time migration service.
+
+`.dockerignore`
+Keeps local secrets, installed dependencies, generated output, and repository
+metadata out of the Docker build context.
+
+`.github/workflows/ci.yml`
+Runs the client, server, and Docker checks for pushes and pull requests.
+
 ## Client
 
 `client/src/App.tsx`
@@ -78,7 +93,8 @@ Everything for the task API feature.
 - `trashService.ts`: permanently removes tasks after 30 days in Trash.
 
 `server/src/features/auth`
-Registration, login, logout, sessions, password hashing, and password changes.
+Registration, login, logout, sessions, password hashing, optional email
+verification, password changes, and recovery codes.
 
 `server/src/features/tags`
 Account-owned tag endpoints, validation, colors, saved ordering, and
@@ -95,5 +111,5 @@ Database schema and migration history.
 
 `server/tests`
 Integration tests for authentication, session security, task and tag ownership,
-task CRUD, and recycle-bin retention. The helper creates and removes a separate
-`rubix_test` database.
+task CRUD, recovery, and recycle-bin retention. The helper creates and removes
+a separate `rubix_test` database.

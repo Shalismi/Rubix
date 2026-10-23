@@ -92,3 +92,17 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: server
+
+  docker:
+    name: Docker checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build production image
+        run: docker build --target runtime --tag rubix:ci .
