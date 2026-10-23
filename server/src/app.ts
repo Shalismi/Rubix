@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { environment } from "./config/environment.js";
 import { authRouter } from "./features/auth/authRoutes.js";
 import { emailVerificationRouter } from "./features/auth/emailVerificationRoutes.js";
+import { streakRouter } from "./features/streaks/streakRoutes.js";
 import { tagRouter } from "./features/tags/tagRoutes.js";
 import { taskRouter } from "./features/tasks/taskRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -29,6 +30,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/auth/email", emailVerificationRouter);
+app.use("/api/streaks", streakRouter);
 app.use("/api/tags", tagRouter);
 app.use("/api/tasks", taskRouter);
 

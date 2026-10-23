@@ -8,19 +8,20 @@ datasource db {
 }
 
 model User {
-  id                 Int       @id @default(autoincrement())
-  username           String    @unique
-  email              String?   @unique
-  emailVerifiedAt    DateTime? @map("email_verified_at")
-  passwordHash       String    @map("password_hash")
-  recoveryCodeHash   String?   @map("recovery_code_hash")
-  tagPriorityEnabled Boolean   @default(true) @map("tag_priority_enabled")
+  id                     Int                     @id @default(autoincrement())
+  username               String                  @unique
+  email                  String?                 @unique
+  emailVerifiedAt        DateTime?               @map("email_verified_at")
+  passwordHash           String                  @map("password_hash")
+  recoveryCodeHash       String?                 @map("recovery_code_hash")
+  tagPriorityEnabled     Boolean                 @default(true) @map("tag_priority_enabled")
   emailVerificationToken EmailVerificationToken?
-  sessions           Session[]
-  tasks              Task[]
-  tags               Tag[]
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
+  sessions               Session[]
+  streakDays             StreakDay[]
+  tasks                  Task[]
+  tags                   Tag[]
+  createdAt              DateTime                @default(now()) @map("created_at")
+  updatedAt              DateTime                @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -49,6 +50,16 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+model StreakDay {
+  userId       Int      @map("user_id")
+  activityDate String   @map("activity_date")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, activityDate])
+  @@map("streak_days")
 }
 
 model Task {

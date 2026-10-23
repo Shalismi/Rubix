@@ -5,6 +5,7 @@ import { TaskSection } from "./TaskSection";
 import { TagFilter } from "../../tags/components/TagFilter";
 import { TagManager } from "../../tags/components/TagManager";
 import { StreakPanel } from "../../streaks/components/StreakPanel";
+import type { StreakSummary } from "../../streaks/types";
 import type { Tag, TagInput, TagMoveDirection } from "../../tags/types";
 import type { NewTaskInput, Task } from "../types";
 import { getActiveTaskGroups } from "../utils/taskGroups";
@@ -63,6 +64,9 @@ type TaskDashboardProps = {
   isAddingTask: boolean;
   isLoadingTasks: boolean;
   selectedTaskId: number | null;
+  streak: StreakSummary | null;
+  streakError: string | null;
+  isLoadingStreak: boolean;
   taskError: string | null;
   tags: Tag[];
   selectedTagIds: number[];
@@ -96,6 +100,9 @@ export function TaskDashboard({
   isAddingTask,
   isLoadingTasks,
   selectedTaskId,
+  streak,
+  streakError,
+  isLoadingStreak,
   taskError,
   tags,
   selectedTagIds,
@@ -332,7 +339,11 @@ export function TaskDashboard({
         </section>
 
         <div className="dashboard-rail">
-          <StreakPanel />
+          <StreakPanel
+            streak={streak}
+            isLoading={isLoadingStreak}
+            error={streakError}
+          />
           <CalendarPanel
             selectedTaskId={selectedTaskId}
             tasks={filteredActiveTasks}

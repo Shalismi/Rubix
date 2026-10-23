@@ -48,8 +48,7 @@ Account API requests, session state, registration, and sign-in UI.
 Logged-in account settings, including password changes.
 
 `client/src/features/streaks`
-The dashboard streak preview panel. This is currently presentation-only so the
-future streak rules can be added without mixing them into task components.
+Loads account streak data and displays the current count plus weekly activity.
 
 `client/src/features/tags`
 Reusable account-owned tags, colors, saved priority order, and filtering.
@@ -102,6 +101,10 @@ verification, password changes, and recovery codes.
 `server/src/features/tags`
 Account-owned tag endpoints, validation, colors, saved ordering, and
 duplicate-name rules.
+
+`server/src/features/streaks`
+Records one activity day per account and calculates consecutive-day plus weekly
+streak summaries in the browser's timezone.
 
 `server/src/middleware`
 Reusable Express helpers, like async error catching and the final error response.

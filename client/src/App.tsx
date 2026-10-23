@@ -21,6 +21,7 @@ import { RecoveryCodeScreen } from "./features/auth/components/RecoveryCodeScree
 import { useAuth } from "./features/auth/hooks/useAuth";
 import type { AuthUser } from "./features/auth/types";
 import { AccountSettings } from "./features/settings/components/AccountSettings";
+import { useStreak } from "./features/streaks/hooks/useStreak";
 import { useTags } from "./features/tags/hooks/useTags";
 import type { TagInput } from "./features/tags/types";
 import { TaskCalendarView } from "./features/tasks/components/TaskCalendarView";
@@ -45,7 +46,8 @@ function AuthenticatedApp({
 }: AuthenticatedAppProps) {
   const [activeView, setActiveView] = useState<AppView>("dashboard");
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-  const tasks = useTasks();
+  const streak = useStreak();
+  const tasks = useTasks({ onTaskCompleted: streak.refreshStreak });
   const tags = useTags();
   const allTasks = [...tasks.activeTasks, ...tasks.completedTasks];
   let activeContent;
@@ -83,6 +85,9 @@ function AuthenticatedApp({
         isAddingTask={tasks.isAddingTask}
         isLoadingTasks={tasks.isLoadingTasks}
         selectedTaskId={tasks.selectedTaskId}
+        streak={streak.streak}
+        streakError={streak.streakError}
+        isLoadingStreak={streak.isLoadingStreak}
         taskError={tasks.taskError}
         tags={tags.tags}
         selectedTagIds={selectedTagIds}

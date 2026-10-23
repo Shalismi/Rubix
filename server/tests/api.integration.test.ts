@@ -69,6 +69,19 @@ type Tag = {
   color: string;
 };
 
+type StreakResponse = {
+  streak: {
+    currentStreak: number;
+    today: string;
+    week: Array<{
+      date: string;
+      label: string;
+      completed: boolean;
+      isToday: boolean;
+    }>;
+  };
+};
+
 let apiUrl = "";
 let prisma: PrismaClient | null = null;
 let server: Server | null = null;
@@ -79,6 +92,7 @@ async function request<TBody = JsonBody>(
 ): Promise<TestResponse<TBody>> {
   const headers: Record<string, string> = {
     Origin: "http://localhost:5173",
+    "X-Rubix-Time-Zone": "UTC",
   };
 
   if (options.body) {
@@ -146,6 +160,7 @@ after(async () => {
 test("Rubix authentication and user-owned task flow", async (context) => {
   let firstUserCookie = "";
   let secondUserCookie = "";
+  let firstUserId = 0;
   let taskId = 0;
   let tagId = 0;
   let secondTagId = 0;
@@ -198,6 +213,7 @@ test("Rubix authentication and user-owned task flow", async (context) => {
 
     firstUserCookie = firstUser.cookie!;
     secondUserCookie = secondUser.cookie!;
+    firstUserId = firstUser.body!.user.id;
   });
 
   await context.test(
@@ -600,6 +616,112 @@ test("Rubix authentication and user-owned task flow", async (context) => {
 
     assert.equal(forbiddenTagUse.status, 400);
   });
+
+  await context.test(
+    "records one account-owned streak day per completion date",
+    async () => {
+      const completedTask = await request<{ task: Task }>(
+        `/api/tasks/${taskId}`,
+        {
+          method: "PATCH",
+          cookie: firstUserCookie,
+          body: { completed: true },
+        },
+      );
+      const firstSummary = await request<StreakResponse>("/api/streaks", {
+        cookie: firstUserCookie,
+      });
+
+      assert.equal(completedTask.status, 200);
+      assert.equal(firstSummary.status, 200);
+      assert.equal(firstSummary.body?.streak.currentStreak, 1);
+      assert.equal(
+        firstSummary.body?.streak.week.find((day) => day.isToday)?.completed,
+        true,
+      );
+
+      await request(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        cookie: firstUserCookie,
+        body: { completed: false },
+      });
+      const summaryAfterUndo = await request<StreakResponse>("/api/streaks", {
+        cookie: firstUserCookie,
+      });
+
+      assert.equal(summaryAfterUndo.body?.streak.currentStreak, 1);
+
+      await request(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        cookie: firstUserCookie,
+        body: { completed: true },
+      });
+
+      assert.equal(
+        await prisma!.streakDay.count({ where: { userId: firstUserId } }),
+        1,
+      );
+
+      const secondUserSummary = await request<StreakResponse>("/api/streaks", {
+        cookie: secondUserCookie,
+      });
+
+      assert.equal(secondUserSummary.body?.streak.currentStreak, 0);
+
+      const today = firstSummary.body!.streak.today;
+      const getDateWithOffset = (offset: number) => {
+        const [year, month, day] = today.split("-").map(Number);
+        const date = new Date(Date.UTC(year!, month! - 1, day! + offset));
+
+        return date.toISOString().slice(0, 10);
+      };
+      const yesterday = getDateWithOffset(-1);
+      const twoDaysAgo = getDateWithOffset(-2);
+
+      await prisma!.streakDay.createMany({
+        data: [
+          { userId: firstUserId, activityDate: yesterday },
+          { userId: firstUserId, activityDate: twoDaysAgo },
+        ],
+        skipDuplicates: true,
+      });
+
+      const consecutiveSummary = await request<StreakResponse>(
+        "/api/streaks",
+        { cookie: firstUserCookie },
+      );
+
+      assert.equal(consecutiveSummary.body?.streak.currentStreak, 3);
+
+      await prisma!.streakDay.delete({
+        where: {
+          userId_activityDate: { userId: firstUserId, activityDate: today },
+        },
+      });
+
+      const yesterdayGraceSummary = await request<StreakResponse>(
+        "/api/streaks",
+        { cookie: firstUserCookie },
+      );
+
+      assert.equal(yesterdayGraceSummary.body?.streak.currentStreak, 2);
+
+      await prisma!.streakDay.delete({
+        where: {
+          userId_activityDate: {
+            userId: firstUserId,
+            activityDate: yesterday,
+          },
+        },
+      });
+
+      const gapSummary = await request<StreakResponse>("/api/streaks", {
+        cookie: firstUserCookie,
+      });
+
+      assert.equal(gapSummary.body?.streak.currentStreak, 0);
+    },
+  );
 
   await context.test("updates, recycles, restores, and deletes an owned task", async () => {
     const updatedTask = await request<{ task: Task }>(`/api/tasks/${taskId}`, {

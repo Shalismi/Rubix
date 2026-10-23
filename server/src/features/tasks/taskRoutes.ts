@@ -2,6 +2,10 @@ import { Router } from "express";
 import { prisma } from "../../db/prisma.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import { requireAuth } from "../../middleware/requireAuth.js";
+import {
+  getActivityDate,
+  getRequestTimeZone,
+} from "../streaks/streakService.js";
 import { serializeTask } from "./taskSerializer.js";
 import type { TaskInput } from "./taskTypes.js";
 import { purgeExpiredTasks } from "./trashService.js";
@@ -196,7 +200,7 @@ taskRouter.patch(
       return;
     }
 
-    const updatedTask = await prisma.task.update({
+    const taskUpdate = {
       where: { id: taskId },
       data: {
         ...taskFields,
@@ -210,7 +214,34 @@ taskRouter.patch(
           : {}),
       },
       include: tagsInclude,
-    });
+    };
+    const earnsStreakDay =
+      !existingTask.completed && taskFields.completed === true;
+    const updatedTask = earnsStreakDay
+      ? await prisma.$transaction(async (transaction) => {
+          const task = await transaction.task.update(taskUpdate);
+          const timeZone = getRequestTimeZone(
+            req.get("X-Rubix-Time-Zone"),
+          );
+          const activityDate = getActivityDate(timeZone);
+
+          await transaction.streakDay.upsert({
+            where: {
+              userId_activityDate: {
+                userId: req.auth!.user.id,
+                activityDate,
+              },
+            },
+            create: {
+              userId: req.auth!.user.id,
+              activityDate,
+            },
+            update: {},
+          });
+
+          return task;
+        })
+      : await prisma.task.update(taskUpdate);
 
     res.json({ task: serializeTask(updatedTask) });
   }),

@@ -64,7 +64,11 @@ function replaceTask(tasks: Task[], updatedTask: Task) {
   );
 }
 
-export function useTasks() {
+type UseTasksOptions = {
+  onTaskCompleted?: () => void | Promise<void>;
+};
+
+export function useTasks({ onTaskCompleted }: UseTasksOptions = {}) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [trashedTasks, setTrashedTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
@@ -222,6 +226,10 @@ export function useTasks() {
       setTasks((currentTasks) => replaceTask(currentTasks, updatedTask));
       setSelectedTaskId(taskId);
       setTaskError(null);
+
+      if (!task.completed) {
+        void onTaskCompleted?.();
+      }
     } catch {
       setTaskError("Could not update task status.");
     }

@@ -20,6 +20,7 @@ server-backed sessions, automated tests, Docker, and continuous integration.
 - Create, edit, complete, and delete tasks with due dates.
 - Separate past-due, today, upcoming, and completed task sections.
 - Search tasks and preserve each account's collapsed section preferences.
+- Track consecutive days with at least one completed task.
 - View tasks on a full monthly calendar and jump from calendar entries to the
   matching dashboard task.
 - Move deleted tasks into Trash, restore them, or permanently delete them.
@@ -262,13 +263,10 @@ successful push to `main`.
 
 ## Current Status
 
-The core account, task, tag, calendar, Trash, persistence, testing, and
-deployment flows are implemented. Two areas are intentionally marked as future
-work:
-
-- The streak panel is currently a UI preview and does not yet calculate streaks.
-- Real email delivery is disabled. Optional email sign-in works, while
-  verification and password recovery use local/test flows and recovery codes.
+The core account, task, tag, streak, calendar, Trash, persistence, testing, and
+deployment flows are implemented. Real email delivery is intentionally
+disabled. Optional email sign-in works, while verification and password
+recovery use local/test flows and recovery codes.
 
 ## Project Structure
 

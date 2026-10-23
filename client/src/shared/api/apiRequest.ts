@@ -32,9 +32,14 @@ export async function apiRequest<T>(
     ...requestOptions
   } = options;
   const requestHeaders = new Headers(headers);
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   if (typeof requestOptions.body === "string" && !requestHeaders.has("Content-Type")) {
     requestHeaders.set("Content-Type", "application/json");
+  }
+
+  if (timeZone && !requestHeaders.has("X-Rubix-Time-Zone")) {
+    requestHeaders.set("X-Rubix-Time-Zone", timeZone);
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {

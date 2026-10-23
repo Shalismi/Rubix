@@ -29,17 +29,6 @@
   line-height: 1.2;
 }
 
-.streak-header > span {
-  padding: 0.22rem 0.45rem;
-  border: 1px solid #d0d5dd;
-  border-radius: 999px;
-  background: #f8fafc;
-  color: #667085;
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
 .streak-value {
   display: flex;
   align-items: baseline;
@@ -74,4 +63,23 @@
   color: #667085;
   font-size: 0.68rem;
   font-weight: 800;
+}
+
+.streak-week span.is-complete {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.2);
+}
+
+.streak-week span.is-today {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.streak-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
