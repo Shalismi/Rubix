@@ -21,6 +21,9 @@ metadata out of the Docker build context.
 `.github/workflows/ci.yml`
 Runs the client, server, and Docker checks for pushes and pull requests.
 
+`docs/screenshots`
+Stores the product screenshots displayed in the GitHub README.
+
 ## Client
 
 `client/src/App.tsx`
