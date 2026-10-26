@@ -47,7 +47,7 @@ function buildTaskInput(taskInput: NewTaskInput) {
     dueDate: getDefaultDueDate(taskInput.dueDate),
   };
 
-  if (taskInput.description) {
+  if (typeof taskInput.description === "string") {
     nextTask.description = taskInput.description;
   }
 
@@ -79,6 +79,45 @@ export function useTasks({ onTaskCompleted }: UseTasksOptions = {}) {
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const { activeTasks, completedTasks } = splitTasks(tasks);
+
+  useEffect(() => {
+    if (selectedTaskId === null) {
+      return;
+    }
+
+    function handleOutsideSelection(event: Event) {
+      const target = event.target;
+      if (target instanceof Element) {
+        const selectedCard = document.getElementById(`task-${selectedTaskId}`);
+        if (
+          selectedCard?.contains(target) ||
+          target.closest(
+            ".calendar-day:not(:disabled), .upcoming-task, .next-task-button, .calendar-view-task",
+          )
+        ) {
+          return;
+        }
+      }
+
+      setSelectedTaskId(null);
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSelectedTaskId(null);
+      }
+    }
+
+    document.addEventListener("pointerdown", handleOutsideSelection, true);
+    document.addEventListener("click", handleOutsideSelection, true);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideSelection, true);
+      document.removeEventListener("click", handleOutsideSelection, true);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedTaskId]);
 
   useEffect(() => {
     getTasks()
@@ -207,10 +246,6 @@ export function useTasks({ onTaskCompleted }: UseTasksOptions = {}) {
     });
   }
 
-  function clearSelectedTask() {
-    setSelectedTaskId(null);
-  }
-
   async function toggleTaskCompleted(taskId: number) {
     const task = tasks.find((currentTask) => currentTask.id === taskId);
 
@@ -287,7 +322,6 @@ export function useTasks({ onTaskCompleted }: UseTasksOptions = {}) {
     addTask,
     cancelAddTask,
     cancelEditingTask,
-    clearSelectedTask,
     deleteTask,
     permanentlyDeleteTask,
     restoreTask,

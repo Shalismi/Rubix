@@ -89,7 +89,13 @@ export function TaskSection({
               aria-expanded={!isCollapsed}
               aria-label={`${isCollapsed ? "Show" : "Hide"} ${title}`}
             >
-              {isCollapsed ? "v" : "^"}
+              <svg
+                className="task-section-toggle-icon"
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+              >
+                <path d={isCollapsed ? "m6 8 4 4 4-4" : "m6 12 4-4 4 4"} />
+              </svg>
             </button>
           )}
         </div>

@@ -1,12 +1,3 @@
-export function formatDueDate(dateValue: string) {
-  const date = new Date(`${dateValue}T00:00:00`);
-
-  return `Due ${new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(date)}`;
-}
-
 export function toDateValue(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -49,6 +40,36 @@ export function formatCalendarWeekday(dateValue: string) {
 
   return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
+  }).format(date);
+}
+
+export function formatNextTaskTiming(
+  dateValue: string,
+  todayDateValue = getTodayDateValue(),
+) {
+  if (dateValue === todayDateValue) {
+    return "Today";
+  }
+
+  const tomorrow = new Date(`${todayDateValue}T00:00:00`);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (dateValue === toDateValue(tomorrow)) {
+    return "Tomorrow";
+  }
+
+  const weekEnd = new Date(`${todayDateValue}T00:00:00`);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const date = new Date(`${dateValue}T00:00:00`);
+  if (dateValue > todayDateValue && dateValue <= toDateValue(weekEnd)) {
+    return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(date.getFullYear() !== Number(todayDateValue.slice(0, 4))
+      ? { year: "numeric" as const }
+      : {}),
   }).format(date);
 }
 

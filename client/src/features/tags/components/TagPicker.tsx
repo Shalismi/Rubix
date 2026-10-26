@@ -12,6 +12,8 @@ type TagPickerProps = {
   selectedTagIds: number[];
   onAddTag: (tag: TagInput) => Promise<Tag | null>;
   onChange: (tagIds: number[]) => void;
+  compact?: boolean;
+  disabled?: boolean;
 };
 
 export function TagPicker({
@@ -19,6 +21,8 @@ export function TagPicker({
   selectedTagIds,
   onAddTag,
   onChange,
+  compact = false,
+  disabled = false,
 }: TagPickerProps) {
   const detailsRef = useDismissibleDetails();
   const [newName, setNewName] = useState("");
@@ -71,8 +75,8 @@ export function TagPicker({
   }
 
   return (
-    <fieldset className="tag-picker">
-      <legend>Tags</legend>
+    <fieldset className="tag-picker" disabled={disabled}>
+      <legend className={compact ? "visually-hidden" : undefined}>Tags</legend>
 
       <div className="tag-picker-control">
         {selectedTags.length > 0 && (
@@ -93,7 +97,12 @@ export function TagPicker({
         )}
 
         <details className="tag-picker-details" ref={detailsRef}>
-          <summary>
+          <summary
+            aria-disabled={disabled || undefined}
+            onClick={(event) => {
+              if (disabled) event.preventDefault();
+            }}
+          >
             <span aria-hidden="true">+</span>
             Add a tag
           </summary>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./styles/fonts.css";
 import "./styles/layout.css";
 import "./styles/buttons.css";
 import "./styles/forms.css";
@@ -9,8 +10,11 @@ import "./styles/settings.css";
 import "./styles/streaks.css";
 import "./styles/tags.css";
 import "./styles/trash.css";
+import "./styles/theme.css";
 import { AppHeader } from "./app/components/AppHeader";
 import { AppSidebar, type AppView } from "./app/components/AppSidebar";
+import { FONT_OPTIONS } from "./app/config/fonts";
+import { useFont } from "./app/hooks/useFont";
 import {
   AuthLoadingScreen,
   AuthScreen,
@@ -28,6 +32,7 @@ import { TaskCalendarView } from "./features/tasks/components/TaskCalendarView";
 import { TaskDashboard } from "./features/tasks/components/TaskDashboard";
 import { TrashView } from "./features/tasks/components/TrashView";
 import { useTasks } from "./features/tasks/hooks/useTasks";
+import { sortTasksByTagPriority } from "./features/tasks/utils/taskPriority";
 
 type AuthenticatedAppProps = {
   authError: string | null;
@@ -35,6 +40,7 @@ type AuthenticatedAppProps = {
   onSignOut: () => Promise<void>;
   onUserChange: (user: AuthUser) => void;
   user: AuthUser;
+  welcomeMessage: string;
 };
 
 function AuthenticatedApp({
@@ -43,13 +49,25 @@ function AuthenticatedApp({
   onSignOut,
   onUserChange,
   user,
+  welcomeMessage,
 }: AuthenticatedAppProps) {
+  const { font, setFont } = useFont(user.id);
   const [activeView, setActiveView] = useState<AppView>("dashboard");
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const streak = useStreak();
   const tasks = useTasks({ onTaskCompleted: streak.refreshStreak });
   const tags = useTags();
-  const allTasks = [...tasks.activeTasks, ...tasks.completedTasks];
+  const activeTasks = sortTasksByTagPriority(
+    tasks.activeTasks,
+    tags.tags,
+    tags.isPriorityEnabled,
+  );
+  const completedTasks = sortTasksByTagPriority(
+    tasks.completedTasks,
+    tags.tags,
+    tags.isPriorityEnabled,
+  );
+  const allTasks = [...activeTasks, ...completedTasks];
   let activeContent;
 
   async function handleEditTag(tagId: number, input: TagInput) {
@@ -79,8 +97,10 @@ function AuthenticatedApp({
     activeContent = (
       <TaskDashboard
         userId={user.id}
-        activeTasks={tasks.activeTasks}
-        completedTasks={tasks.completedTasks}
+        username={user.username}
+        welcomeMessage={welcomeMessage}
+        activeTasks={activeTasks}
+        completedTasks={completedTasks}
         editingTaskId={tasks.editingTaskId}
         isAddingTask={tasks.isAddingTask}
         isLoadingTasks={tasks.isLoadingTasks}
@@ -98,9 +118,9 @@ function AuthenticatedApp({
         onAddTask={tasks.addTask}
         onCancelAddTask={tasks.cancelAddTask}
         onCancelEditTask={tasks.cancelEditingTask}
-        onClearSelectedTask={tasks.clearSelectedTask}
         onDeleteTask={tasks.deleteTask}
         onSelectTask={tasks.selectTask}
+        onOpenCalendar={() => setActiveView("calendar")}
         onStartEditTask={tasks.startEditingTask}
         onToggleAddTask={tasks.toggleAddTask}
         onToggleTaskCompleted={tasks.toggleTaskCompleted}
@@ -126,26 +146,37 @@ function AuthenticatedApp({
     );
   } else if (activeView === "trash") {
     activeContent = (
-      <TrashView
-        tasks={tasks.trashedTasks}
-        tags={tags.tags}
-        isLoading={tasks.isLoadingTrash}
-        error={tasks.trashError}
-        onRestore={tasks.restoreTask}
-        onPermanentlyDelete={tasks.permanentlyDeleteTask}
-      />
+      <div className="trash-layout">
+        <TrashView
+          tasks={tasks.trashedTasks}
+          tags={tags.tags}
+          isLoading={tasks.isLoadingTrash}
+          error={tasks.trashError}
+          onRestore={tasks.restoreTask}
+          onPermanentlyDelete={tasks.permanentlyDeleteTask}
+        />
+      </div>
     );
   } else {
     activeContent = (
-      <AccountSettings user={user} onUserChange={onUserChange} />
+      <AccountSettings
+        user={user}
+        onUserChange={onUserChange}
+        font={font}
+        onFontChange={setFont}
+      />
     );
   }
 
   return (
-    <div className="app-shell">
+    <div
+      className="app-shell"
+      data-font={font}
+      style={{ fontFamily: FONT_OPTIONS[font].family }}
+    >
       <AppSidebar activeView={activeView} onSelectView={setActiveView} />
 
-      <div className="app-main">
+      <div className={`app-main${activeView === "calendar" ? " app-main-calendar" : ""}`}>
         <AppHeader
           authError={authError}
           isSigningOut={isSigningOut}
@@ -200,11 +231,13 @@ function App() {
 
   return (
     <AuthenticatedApp
+      key={auth.user.id}
       authError={auth.authError}
       isSigningOut={auth.isSubmitting}
       onSignOut={auth.logout}
       onUserChange={auth.updateUser}
       user={auth.user}
+      welcomeMessage={auth.welcomeMessage}
     />
   );
 }

@@ -1,0 +1,1980 @@
+body:has(.app-shell) {
+  min-width: 0;
+}
+
+.app-shell {
+  --right-column-width: 26rem;
+  --appearance-ink: #182254;
+  --appearance-muted: #6173a9;
+  --appearance-border: rgb(255 255 255 / 95%);
+  --appearance-card: linear-gradient(155deg, #ffffff 15%, #f8faff 100%);
+
+  background:
+    radial-gradient(ellipse at 56% 0%, rgb(209 198 241 / 48%), transparent 58%),
+    radial-gradient(ellipse at 12% 50%, rgb(193 224 255 / 65%), transparent 65%),
+    linear-gradient(135deg, #f0f6ff, #e8efff 55%, #edf3ff);
+  color: var(--appearance-ink);
+}
+
+.app-shell .app-sidebar {
+  align-self: start;
+  height: 100vh;
+  min-height: 0;
+  padding: 1.5rem 1.1rem;
+  border: 1px solid var(--appearance-border);
+  border-left: 0;
+  border-radius: 0 24px 24px 0;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(255 255 255 / 95%), transparent 70%),
+    linear-gradient(160deg, #f4f8ff, #eaf2ff 60%, #eef0ff);
+  box-shadow: inset -1px 0 1px #ffffff, 12px 0 36px -24px rgb(62 87 141 / 25%);
+  overflow-y: auto;
+}
+
+.app-shell .sidebar-brand {
+  color: var(--appearance-ink);
+  font-size: calc(2rem * var(--text-scale));
+  letter-spacing: -0.04em;
+}
+
+.app-shell .sidebar-nav {
+  gap: 0.65rem;
+  padding: 0.25rem;
+}
+
+.app-shell .sidebar-nav-item {
+  position: relative;
+  grid-template-columns: 2.15rem minmax(0, 1fr);
+  gap: 0.8rem;
+  min-height: 3.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  color: #52638e;
+  font-size: calc(0.95rem * var(--text-scale));
+  background: transparent;
+  transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.app-shell .sidebar-nav-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1px solid rgb(255 255 255 / 95%);
+  border-radius: 11px;
+  background: linear-gradient(150deg, #ffffff, #edf3ff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 5px 13px -6px rgb(57 76 116 / 22%);
+  color: #6579b7;
+}
+
+.app-shell .sidebar-nav-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 1.8;
+}
+
+.app-shell .sidebar-nav-item:hover {
+  border-color: var(--appearance-border);
+  background: linear-gradient(150deg, #ffffff, #eff4ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 8px 20px -12px rgb(57 76 116 / 24%);
+  color: #283c78;
+}
+
+.app-shell .sidebar-nav-item.is-active {
+  border-color: var(--appearance-border);
+  background: linear-gradient(140deg, #ffffff, #e4edff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 9px 24px -12px rgb(57 76 116 / 25%);
+  color: var(--appearance-ink);
+}
+
+.app-shell .sidebar-nav-item.is-active::before {
+  position: absolute;
+  top: 1.1rem;
+  bottom: 1.1rem;
+  left: 0.2rem;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(#48baff, #6264e8);
+  content: "";
+}
+
+.app-shell .sidebar-nav-item.is-active .sidebar-nav-icon {
+  border-color: #a2ceff;
+  background:
+    radial-gradient(ellipse at 10% 0%, #57d8ff, transparent 65%),
+    linear-gradient(145deg, #269dff, #5162ed);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 65%), 0 5px 14px -6px rgb(43 65 124 / 30%);
+  color: #ffffff;
+}
+
+.app-shell .sidebar-nav-item.is-active:hover {
+  background: linear-gradient(140deg, #ffffff, #dce7ff);
+}
+
+.app-shell .sidebar-nav-item:focus-visible {
+  outline: 2px solid #8297d9;
+  outline-offset: 3px;
+}
+
+.app-shell .sidebar-nav-item:active {
+  box-shadow: inset 0 1px 4px rgb(80 107 166 / 13%);
+}
+
+.app-shell .sidebar-logo-image {
+  display: block;
+  flex: 0 0 auto;
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 5px rgb(30 44 81 / 12%));
+}
+
+.app-shell .account-area {
+  padding: 0.6rem 0.8rem;
+  border-color: var(--appearance-border);
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(255 255 255 / 95%), transparent 75%),
+    linear-gradient(135deg, #edf5ff, #f3f5ff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 10px 26px -10px rgb(91 125 185 / 22%);
+}
+
+.app-shell .account-copy strong {
+  color: var(--appearance-ink);
+}
+
+.app-shell .sign-out-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.65rem;
+  border-color: #e0e8fb;
+  border-radius: 11px;
+  background: linear-gradient(155deg, #ffffff, #eef3ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 6px 16px -7px rgb(57 76 116 / 18%);
+  color: #354578;
+}
+
+.app-shell .sign-out-button:hover:not(:disabled) {
+  border-color: #b8cafa;
+  background: linear-gradient(155deg, #ffffff, #e4edff);
+}
+
+.app-shell .sign-out-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.app-shell .task-primary-button,
+.app-shell .task-cancel-button,
+.app-shell .tag-manager-panel .tag-panel-primary,
+.app-shell .tag-manager-panel .tag-panel-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.85rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(255 255 255 / 60%);
+  border-bottom-color: rgb(255 255 255 / 25%);
+  border-radius: 13px;
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 55%),
+    inset 0 -3px 5px rgb(var(--task-button-edge) / 18%),
+    0 2px 0 rgb(var(--task-button-edge) / 14%),
+    0 10px 26px -8px rgb(38 46 77 / 24%);
+  color: #ffffff;
+  font-size: calc(0.86rem * var(--text-scale));
+  font-weight: 750;
+  line-height: 1.25;
+  text-shadow: 0 1px 2px rgb(var(--task-button-edge) / 25%);
+  white-space: nowrap;
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+}
+
+.app-shell .task-primary-button,
+.app-shell .tag-manager-panel .tag-panel-primary {
+  --task-button-edge: 57 49 184;
+
+  background:
+    radial-gradient(ellipse at 7% 0%, rgb(76 239 255 / 85%), transparent 50%),
+    radial-gradient(ellipse at 100% 0%, rgb(238 164 255 / 90%), transparent 50%),
+    linear-gradient(110deg, #00b9ff, #2471ff 40%, #5945ff 70%, #b92bf1);
+}
+
+.app-shell .task-cancel-button,
+.app-shell .tag-manager-panel .tag-panel-cancel {
+  --task-button-edge: 163 32 72;
+
+  background:
+    radial-gradient(ellipse at 7% 0%, rgb(255 182 164 / 85%), transparent 50%),
+    radial-gradient(ellipse at 100% 0%, rgb(255 165 203 / 85%), transparent 50%),
+    linear-gradient(110deg, #f87975, #ed4f64 40%, #df3b65 70%, #c72b60);
+}
+
+.app-shell .task-primary-button:hover:not(:disabled),
+.app-shell .task-cancel-button:hover:not(:disabled),
+.app-shell .tag-manager-panel .tag-panel-primary:hover:not(:disabled),
+.app-shell .tag-manager-panel .tag-panel-cancel:hover:not(:disabled) {
+  filter: brightness(1.025);
+  transform: translateY(-1px);
+}
+
+.app-shell .task-primary-button:active:not(:disabled),
+.app-shell .task-cancel-button:active:not(:disabled),
+.app-shell .tag-manager-panel .tag-panel-primary:active:not(:disabled),
+.app-shell .tag-manager-panel .tag-panel-cancel:active:not(:disabled) {
+  box-shadow:
+    inset 0 1px 3px rgb(var(--task-button-edge) / 20%),
+    inset 0 1px 0 rgb(255 255 255 / 35%),
+    0 1px 0 rgb(var(--task-button-edge) / 25%),
+    0 4px 14px -5px rgb(38 46 77 / 20%);
+  filter: brightness(0.98);
+  transform: translateY(2px);
+}
+
+.app-shell .task-primary-button:focus-visible,
+.app-shell .task-cancel-button:focus-visible,
+.app-shell .tag-manager-panel .tag-panel-primary:focus-visible,
+.app-shell .tag-manager-panel .tag-panel-cancel:focus-visible {
+  outline: 3px solid rgb(var(--task-button-edge) / 55%);
+  outline-offset: 4px;
+}
+
+.app-shell .task-primary-button:disabled,
+.app-shell .task-cancel-button:disabled,
+.app-shell .tag-manager-panel .tag-panel-primary:disabled,
+.app-shell .tag-manager-panel .tag-panel-cancel:disabled {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 50%), 0 3px 12px -5px rgb(38 46 77 / 12%);
+  cursor: not-allowed;
+  filter: saturate(0.6);
+  opacity: 0.55;
+  transform: none;
+}
+
+.app-shell .tag-filter > summary,
+.app-shell .tag-manager > summary {
+  gap: 0.45rem;
+  min-height: 2.85rem;
+  padding: 0 0.85rem;
+  border: 1px solid rgb(255 255 255 / 95%);
+  border-radius: 13px;
+  background: linear-gradient(155deg, #ffffff 10%, #f1f5ff);
+  box-shadow:
+    inset 0 1px 1px #ffffff,
+    inset 0 -1px 2px rgb(112 140 205 / 7%),
+    0 2px 0 rgb(194 209 245 / 15%),
+    0 9px 24px -8px rgb(57 76 116 / 20%);
+  color: var(--appearance-ink);
+  font-size: calc(0.8rem * var(--text-scale));
+  font-weight: 750;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.app-shell .tag-toolbar-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: #35468e;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.app-shell .tag-filter > summary:hover,
+.app-shell .tag-manager > summary:hover,
+.app-shell .tag-filter[open] > summary,
+.app-shell .tag-manager[open] > summary {
+  border-color: #dce6ff;
+  background: linear-gradient(155deg, #ffffff 10%, #e9f0ff);
+  color: #283878;
+}
+
+.app-shell .tag-filter > summary:hover,
+.app-shell .tag-manager > summary:hover {
+  transform: translateY(-1px);
+}
+
+.app-shell .tag-filter > summary:active,
+.app-shell .tag-manager > summary:active {
+  box-shadow: inset 0 1px 3px rgb(112 140 205 / 12%), 0 2px 5px rgb(95 131 211 / 10%);
+  transform: translateY(1px);
+}
+
+.app-shell .tag-filter > summary:focus-visible,
+.app-shell .tag-manager > summary:focus-visible {
+  outline: 3px solid #a2b6ee;
+  outline-offset: 4px;
+}
+
+.app-shell .tag-filter-menu,
+.app-shell .tag-manager-panel {
+  padding: 1rem;
+  border-color: var(--appearance-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 0% 0%, #ffffff, transparent 75%),
+    linear-gradient(145deg, #edf5ff, #f1f3ff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 16px 38px -12px rgb(62 87 141 / 25%);
+  color: var(--appearance-ink);
+}
+
+.app-shell .tag-filter-menu {
+  width: min(18rem, calc(100vw - 7rem));
+  gap: 0.75rem;
+}
+
+.app-shell .tag-manager-panel {
+  container: tag-manager / inline-size;
+  display: flex;
+  flex-direction: column;
+  top: calc(100% - 1rem);
+  width: min(27rem, 100%);
+  max-height: min(42rem, 75dvh);
+  gap: 1rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c0cdea transparent;
+}
+
+.app-shell .tag-manager-panel > * {
+  flex-shrink: 0;
+}
+
+.app-shell .dashboard-card-actions > .tag-manager {
+  position: static;
+}
+
+.app-shell .tag-panel-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.4rem;
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #ffffff, #e5edff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 4px 10px -5px rgb(57 76 116 / 20%);
+  fill: none;
+  stroke: #5c72b6;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.app-shell .tag-filter-heading,
+.app-shell .tag-manager-heading {
+  gap: 0.5rem;
+  padding: 0 0 0.75rem;
+  border-bottom: 1px solid #dfe7f8;
+  color: var(--appearance-ink);
+  font-size: calc(0.86rem * var(--text-scale));
+}
+
+.app-shell .tag-filter-count,
+.app-shell .tag-panel-count {
+  border: 1px solid #d8e3ff;
+  background: linear-gradient(145deg, #ffffff, #e5edff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 3px 8px -5px rgb(57 76 116 / 18%);
+  color: #5268ac;
+}
+
+.app-shell .tag-filter-options {
+  gap: 0.45rem;
+  max-height: min(20rem, 50dvh);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.app-shell .tag-filter-option {
+  gap: 0.7rem;
+  min-height: 2.7rem;
+  padding: 0.65rem;
+  border: 1px solid #e5ebf8;
+  border-radius: 11px;
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 4px 12px -9px rgb(57 76 116 / 20%);
+}
+
+.app-shell .tag-filter-option:hover,
+.app-shell .tag-filter-option.is-selected {
+  border-color: #c7d7f6;
+  background: linear-gradient(145deg, #ffffff, #e5edff);
+}
+
+.app-shell .tag-filter-option input,
+.app-shell .tag-priority-toggle input {
+  appearance: none;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid #aabadd;
+  border-radius: 5px;
+  background: linear-gradient(145deg, #ffffff, #f1f5ff);
+  box-shadow: inset 0 1px 3px rgb(94 117 174 / 9%);
+  cursor: pointer;
+}
+
+.app-shell .tag-filter-option input:checked,
+.app-shell .tag-priority-toggle input:checked {
+  border-color: #6591ed;
+  background: linear-gradient(145deg, #48b7ff, #6476e7);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 40%), 0 3px 7px -4px rgb(67 96 167 / 30%);
+}
+
+.app-shell .tag-filter-option input:checked::after,
+.app-shell .tag-priority-toggle input:checked::after {
+  width: 0.45rem;
+  height: 0.25rem;
+  margin-top: -0.1rem;
+  border-bottom: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  content: "";
+  transform: rotate(-45deg);
+}
+
+.app-shell .tag-filter-option .tag-pill,
+.app-shell .tag-manager-panel .tag-pill {
+  color: #43578d;
+  font-size: calc(0.8rem * var(--text-scale));
+  line-height: 1.35;
+}
+
+.app-shell .tag-filter-option .tag-pill > span:last-child,
+.app-shell .tag-manager-panel .tag-pill > span:last-child {
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .tag-manager-panel .tag-create-form,
+.app-shell .tag-priority-setting {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #e1e8f8;
+  border-radius: 13px;
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 5px 14px -10px rgb(57 76 116 / 20%);
+}
+
+.app-shell .tag-manager-panel .tag-create-form {
+  gap: 0.85rem 0.65rem;
+}
+
+.app-shell .tag-create-form label,
+.app-shell .tag-edit-row label {
+  min-width: 0;
+  color: #52638e;
+}
+
+.app-shell .tag-create-form input[type="text"],
+.app-shell .tag-edit-row input[type="text"] {
+  min-width: 0;
+  min-height: 2.5rem;
+  border-color: #dde6f9;
+  border-radius: 10px;
+  background: #f8faff;
+  box-shadow: inset 0 1px 3px rgb(94 117 174 / 5%);
+  color: var(--appearance-ink);
+}
+
+.app-shell .tag-manager-panel .tag-color-picker {
+  gap: 0.6rem;
+  padding: 0.15rem;
+}
+
+.app-shell .tag-manager-panel .tag-color-picker button {
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 1px solid rgb(255 255 255 / 85%);
+  background-image: linear-gradient(145deg, rgb(255 255 255 / 35%), transparent 60%);
+  box-shadow: inset 0 2px 3px rgb(255 255 255 / 30%), inset 0 -2px 3px rgb(31 47 85 / 12%), 0 4px 9px -5px rgb(57 76 116 / 30%);
+}
+
+.app-shell .tag-manager-panel .tag-color-picker button:hover,
+.app-shell .tag-manager-panel .tag-color-picker button.is-selected {
+  outline: 2px solid #8297d9;
+  outline-offset: 3px;
+}
+
+.app-shell .tag-priority-toggle {
+  align-items: flex-start;
+  min-height: 0;
+  padding: 0;
+  color: #43578d;
+  line-height: 1.4;
+}
+
+.app-shell .tag-priority-toggle input {
+  margin-top: 0.1rem;
+}
+
+.app-shell .tag-priority-toggle input:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.app-shell .tag-priority-note {
+  margin: 0.4rem 0 0 1.6rem;
+  color: var(--appearance-muted);
+  font-size: calc(0.75rem * var(--text-scale));
+  line-height: 1.45;
+}
+
+.app-shell .tag-manager-panel .tag-manager-status,
+.app-shell .tag-manager-panel .tag-manager-error {
+  font-size: calc(0.8rem * var(--text-scale));
+  line-height: 1.45;
+}
+
+.app-shell .tag-manager-panel .tag-manager-status {
+  color: var(--appearance-muted);
+}
+
+.app-shell .tag-manager-list {
+  flex-shrink: 1;
+  grid-auto-rows: max-content;
+  align-content: start;
+  gap: 0.55rem;
+  max-height: 20rem;
+  min-height: 3.5rem;
+  padding: 0.15rem 0.25rem 0.15rem 0.1rem;
+  border: 0;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.app-shell .tag-manager-row,
+.app-shell .tag-edit-row {
+  min-width: 0;
+  padding: 0.65rem;
+  border: 1px solid #e1e8f8;
+  border-radius: 12px;
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.app-shell .tag-manager-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+}
+
+.app-shell .tag-manager-row-actions {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.app-shell .tag-filter-heading button,
+.app-shell .tag-manager-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.05rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #e1e8fb;
+  border-radius: 9px;
+  background: linear-gradient(155deg, #ffffff, #eef3ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 4px 11px -7px rgb(57 76 116 / 18%);
+  color: #43578d;
+}
+
+.app-shell .tag-filter-heading button:hover,
+.app-shell .tag-manager-row button:hover:not(:disabled) {
+  border-color: #c5d4f2;
+  background: linear-gradient(155deg, #ffffff, #e5edff);
+}
+
+.app-shell .tag-manager-panel .tag-panel-primary,
+.app-shell .tag-manager-panel .tag-panel-cancel {
+  min-height: 2.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  font-size: calc(0.78rem * var(--text-scale));
+}
+
+.app-shell .tag-manager-row .tag-remove-button {
+  border-color: #f5dfe7;
+  background: linear-gradient(155deg, #ffffff, #fff0f4);
+  color: #aa3e5d;
+}
+
+.app-shell .tag-manager-row .tag-remove-button:hover:not(:disabled) {
+  border-color: #edc8d5;
+  background: linear-gradient(155deg, #fffafd, #ffe7ee);
+}
+
+.app-shell .tag-manager-row .tag-priority-buttons {
+  gap: 0.25rem;
+}
+
+.app-shell .tag-manager-row .tag-priority-buttons button {
+  width: 1.65rem;
+  height: 1.9rem;
+  min-height: 0;
+  padding: 0;
+  color: #6173a9;
+}
+
+.app-shell .tag-filter-option input:focus-visible,
+.app-shell .tag-manager-panel input:focus-visible,
+.app-shell .tag-filter-heading button:focus-visible,
+.app-shell .tag-manager-row button:focus-visible {
+  outline: 2px solid #8297d9;
+  outline-offset: 3px;
+}
+
+@container tag-manager (max-width: 22rem) {
+  .app-shell .tag-manager-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell .tag-edit-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell .tag-edit-row > label {
+    grid-column: 1 / -1;
+  }
+
+  .app-shell .tag-edit-row > button:first-of-type,
+  .app-shell .tag-edit-row > button:last-of-type {
+    grid-column: auto;
+    grid-row: 3;
+  }
+}
+
+.app-shell .dashboard-card-header {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 1.5rem 0.75rem;
+  padding: 0.35rem 0 1.5rem;
+}
+
+.app-shell .dashboard-welcome h1 {
+  color: var(--appearance-ink);
+}
+
+.app-shell .dashboard-welcome-message {
+  color: var(--appearance-muted);
+}
+
+.app-shell .dashboard-card-actions {
+  display: contents;
+}
+
+.app-shell .dashboard-card-actions > .tag-filter {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.app-shell .dashboard-card-actions > .tag-manager {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.app-shell .task-search {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  max-width: none;
+}
+
+.app-shell .task-section {
+  padding: 1.1rem;
+  border: 1px solid var(--appearance-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgb(255 255 255 / 88%), transparent 68%),
+    linear-gradient(135deg, rgb(232 244 255 / 82%), rgb(244 247 255 / 78%));
+  box-shadow:
+    inset 0 1px 1px #ffffff,
+    inset 0 -1px 0 rgb(255 255 255 / 60%),
+    0 12px 30px rgb(91 145 230 / 12%),
+    0 2px 6px rgb(113 150 221 / 5%);
+}
+
+.app-shell .task-section-header {
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+  padding: 0 0 0 0.15rem;
+}
+
+.app-shell .task-section-heading {
+  gap: 0.65rem;
+}
+
+.app-shell .task-section-heading::before {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 23%, #ffffff 0%, #a7edff 13%, transparent 42%),
+    linear-gradient(145deg, #69d8ff 5%, #2588ff 50%, #354ce9 85%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 35%), 0 3px 6px rgb(63 124 238 / 28%);
+  content: "";
+}
+
+.app-shell .task-section-upcoming .task-section-heading::before {
+  background:
+    radial-gradient(circle at 30% 23%, #ffffff 0%, #e4d7ff 13%, transparent 42%),
+    linear-gradient(145deg, #c1b6ff, #8b75ee 50%, #6651c9);
+}
+
+.app-shell .task-section-overdue .task-section-heading::before {
+  background:
+    radial-gradient(circle at 30% 23%, #ffffff 0%, #ffd9de 13%, transparent 42%),
+    linear-gradient(145deg, #ffa7b4, #ee657e 50%, #d23c63);
+}
+
+.app-shell .task-section-completed .task-section-heading::before {
+  background:
+    radial-gradient(circle at 30% 23%, #ffffff 0%, #d6fff0 13%, transparent 42%),
+    linear-gradient(145deg, #9ce8cd, #42b992 50%, #279978);
+}
+
+.app-shell .task-section-header h2 {
+  color: var(--appearance-ink);
+  font-size: calc(0.88rem * var(--text-scale));
+  font-weight: 800;
+}
+
+.app-shell .task-section-overdue .task-section-header h2 {
+  color: #a63657;
+}
+
+.app-shell .task-section-header p {
+  margin: 0.15rem 0 0 1.65rem;
+  color: var(--appearance-muted);
+  font-size: calc(0.8rem * var(--text-scale));
+}
+
+.app-shell .task-section-count {
+  min-width: 1.4rem;
+  height: 1.4rem;
+  border-color: #ffffff;
+  background: linear-gradient(145deg, #ffffff, #e5edff);
+  box-shadow: 0 2px 5px rgb(95 131 211 / 18%), inset 0 0 0 1px rgb(181 203 255 / 24%);
+  color: #3c4f91;
+}
+
+.app-shell .task-section-toggle {
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffffff, #eaf0ff);
+  box-shadow: 0 5px 12px rgb(111 145 220 / 12%), inset 0 1px 0 #ffffff;
+  color: #3b4c8f;
+}
+
+.app-shell .task-section-toggle:hover {
+  background: #ffffff;
+  box-shadow: 0 5px 14px rgb(99 135 217 / 22%);
+}
+
+.app-shell .task-section-toggle-icon,
+.app-shell .task-checkbox-icon,
+.app-shell .task-action-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.app-shell .task-list {
+  gap: 0.75rem;
+}
+
+.app-shell .task-card {
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.35rem;
+  min-height: 5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--appearance-border);
+  border-radius: 13px;
+  background: var(--appearance-card);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 8px 20px rgb(91 139 226 / 12%),
+    0 2px 5px rgb(124 157 222 / 4%);
+}
+
+.app-shell .task-card.is-selected {
+  border-color: #7d9eea;
+  box-shadow: 0 0 0 3px rgb(104 148 239 / 20%), 0 8px 20px rgb(91 139 226 / 14%);
+}
+
+.app-shell .task-inline-editor {
+  --inline-checkbox-size: 1.4rem;
+  --inline-column-gap: 1.35rem;
+}
+
+.app-shell .task-inline-title,
+.app-shell .task-inline-description {
+  border-color: #e5ebfa;
+  background: rgb(248 250 255 / 75%);
+}
+
+.app-shell .task-inline-title {
+  color: var(--appearance-ink);
+  font-size: calc(0.9rem * var(--text-scale));
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.app-shell .task-inline-description {
+  margin-top: 0.45rem;
+  color: var(--appearance-muted);
+  font-size: calc(0.8rem * var(--text-scale));
+}
+
+.app-shell .task-inline-date {
+  color: var(--appearance-muted);
+}
+
+.app-shell .task-inline-toolbar {
+  border-color: #e5ebfa;
+}
+
+.app-shell .task-inline-toolbar .tag-picker-selected > button,
+.app-shell .task-inline-toolbar .tag-picker-details > summary {
+  min-height: 2rem;
+  border: 1px solid #e1e8ff;
+  border-radius: 9px;
+  background: linear-gradient(180deg, #ffffff, #eef3ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 5px 14px -8px rgb(57 76 116 / 18%);
+  color: #43578d;
+  font-size: calc(0.72rem * var(--text-scale));
+}
+
+.app-shell .task-inline-toolbar .tag-picker-selected .tag-pill {
+  font-size: calc(0.72rem * var(--text-scale));
+}
+
+.app-shell .task-inline-actions > button {
+  width: auto;
+  min-height: 2.1rem;
+  padding: 0.4rem 0.6rem;
+  font-size: calc(0.72rem * var(--text-scale));
+}
+
+.app-shell .task-inline-actions .task-delete-button {
+  border-color: #f8e1e8;
+  background: linear-gradient(180deg, #ffffff, #fff0f4);
+  color: #a63657;
+}
+
+.app-shell .task-inline-title:focus,
+.app-shell .task-inline-description:focus {
+  border-color: #c3d0ee;
+  background: #ffffff;
+}
+
+.app-shell .task-content {
+  align-self: start;
+}
+
+.app-shell .task-checkbox {
+  align-self: start;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.15rem;
+  border: 1.5px solid #9ba9d7;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #ffffff, #f6f8ff);
+  box-shadow: inset 0 1px 3px rgb(111 136 199 / 9%), 0 1px 2px rgb(111 136 199 / 6%);
+}
+
+.app-shell .task-checkbox:hover {
+  border-color: #6d86d2;
+  background: #edf3ff;
+}
+
+.app-shell .task-card.is-complete .task-checkbox {
+  border-color: #3baf8a;
+  background: linear-gradient(145deg, #69cfab, #2ba77f);
+}
+
+.app-shell .task-card.is-complete .task-checkbox:hover {
+  background: #249773;
+}
+
+.app-shell .task-content h3 {
+  overflow-wrap: anywhere;
+  color: var(--appearance-ink);
+  font-size: calc(0.9rem * var(--text-scale));
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.app-shell .task-content p {
+  margin-top: 0.2rem;
+  color: var(--appearance-muted);
+  font-size: calc(0.8rem * var(--text-scale));
+  line-height: 1.25;
+}
+
+.app-shell .task-content .task-due-date.is-overdue {
+  color: #a63657;
+}
+
+.app-shell .task-content .task-description {
+  margin-top: 0.45rem;
+  line-height: 1.5;
+}
+
+.app-shell .task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 1rem;
+  margin-top: 0.65rem;
+}
+
+.app-shell .task-meta .task-due-date {
+  margin: 0;
+}
+
+.app-shell .task-section-today:not(.is-search-result) .task-due-date,
+.app-shell .task-section-today:not(.is-search-result) .task-meta {
+  display: none;
+}
+
+.app-shell .task-card.is-complete .task-content h3 {
+  color: #7784a9;
+}
+
+.app-shell .task-tags {
+  gap: 0.35rem 0.6rem;
+  margin-top: 0.15rem;
+}
+
+.app-shell .task-tags .tag-pill {
+  gap: 0.35rem;
+  color: #4d6096;
+  font-size: calc(0.72rem * var(--text-scale));
+  font-weight: 600;
+}
+
+.app-shell .task-tags .tag-pill > span:last-child {
+  padding: 0.05rem 0.4rem;
+  border-radius: 5px;
+  background: #edf1ff;
+  box-shadow: inset 0 1px 2px rgb(111 136 199 / 7%);
+}
+
+.app-shell .task-tags .tag-color-dot {
+  border-color: rgb(255 255 255 / 75%);
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 75%), 0 1px 3px rgb(97 124 191 / 15%);
+}
+
+.app-shell .task-actions {
+  flex-wrap: nowrap;
+  min-width: 0;
+  max-width: 20rem;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.app-shell .task-actions .task-tags {
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 15rem;
+  margin: 0;
+}
+
+.app-shell .task-actions .tag-pill {
+  max-width: 100%;
+}
+
+.app-shell .task-actions .tag-pill > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .task-actions .task-edit-button {
+  flex: 0 0 auto;
+}
+
+.app-shell .task-edit-button,
+.app-shell .task-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #e1e8ff;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #ffffff, #eef3ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 6px 16px -6px rgb(57 76 116 / 20%);
+  color: #283878;
+  font-size: calc(0.72rem * var(--text-scale));
+  font-weight: 750;
+}
+
+.app-shell .task-edit-button:hover {
+  border-color: #b8cafa;
+  background: linear-gradient(180deg, #ffffff, #e4edff);
+}
+
+.app-shell .task-delete-button:hover {
+  border-color: #f5c5d1;
+  background: linear-gradient(180deg, #ffffff, #fff0f4);
+  color: #a63657;
+}
+
+.app-shell .task-delete-button {
+  min-height: 2.5rem;
+  border-color: #f2c9d2;
+  background: linear-gradient(180deg, #ffffff, #fff0f4);
+  color: #a63657;
+}
+
+.app-shell .streak-panel,
+.app-shell .calendar-panel {
+  align-self: start;
+  gap: 1.4rem;
+  padding: 1.25rem;
+  border: 1px solid var(--appearance-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(255 255 255 / 95%), transparent 75%),
+    linear-gradient(135deg, #edf5ff, #f3f5ff);
+  box-shadow:
+    inset 0 1px 1px #ffffff,
+    0 12px 30px -8px rgb(91 125 185 / 18%);
+}
+
+.app-shell .streak-header h2,
+.app-shell .calendar-header h2 {
+  color: var(--appearance-ink);
+  font-size: calc(1.05rem * var(--text-scale));
+}
+
+.app-shell .streak-fire {
+  border-color: #fff7ee;
+  background: linear-gradient(145deg, #fffdf8, #ffead9);
+  box-shadow: inset 0 1px 0 #ffffff, 0 5px 15px -5px rgb(186 115 76 / 20%);
+}
+
+.app-shell .streak-value {
+  gap: 0.6rem;
+  padding-left: 0.15rem;
+}
+
+.app-shell .streak-value strong {
+  color: var(--appearance-ink);
+  font-size: calc(2.75rem * var(--text-scale));
+  letter-spacing: -0.04em;
+}
+
+.app-shell .streak-value span {
+  color: var(--appearance-muted);
+  font-weight: 600;
+}
+
+.app-shell .streak-week {
+  gap: 0.45rem;
+}
+
+.app-shell .streak-week span {
+  aspect-ratio: auto;
+  min-height: 2.25rem;
+  border-color: #e0e8fb;
+  border-radius: 10px;
+  background: linear-gradient(155deg, #ffffff, #f0f5ff);
+  box-shadow: inset 0 1px 0 #ffffff;
+  color: #6b7ba4;
+}
+
+.app-shell .streak-week span.is-complete {
+  border-color: #c3d4ff;
+  background: linear-gradient(145deg, #dfedff, #d5ddff);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 75%);
+  color: #344b91;
+}
+
+.app-shell .streak-week span.is-today {
+  outline-color: #a1b5ed;
+}
+
+.app-shell .calendar-icon {
+  border-color: #ffffff;
+  background: linear-gradient(145deg, #ffffff, #eff0f3);
+  box-shadow: inset 0 1px 1px #ffffff, 0 5px 15px -5px rgb(63 73 93 / 20%);
+}
+
+.app-shell .calendar-icon svg {
+  width: 2.2rem;
+  height: 2.2rem;
+}
+
+.app-shell .calendar-header {
+  gap: 0.65rem;
+}
+
+.app-shell .calendar-open-button {
+  color: #6678aa;
+}
+
+.app-shell .calendar-open-button:hover {
+  color: #334f99;
+}
+
+.app-shell .calendar-days {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.app-shell .calendar-day {
+  min-width: 0;
+  min-height: 3.75rem;
+  gap: 0.2rem;
+  padding: 0.5rem 0.1rem;
+  border-color: var(--appearance-border);
+  border-radius: 11px;
+  background:
+    radial-gradient(ellipse at 10% 0%, #ffffff, transparent 75%),
+    linear-gradient(145deg, #f5faff, #edf2ff);
+  box-shadow:
+    inset 0 1px 1px #ffffff,
+    0 5px 13px -5px rgb(92 121 185 / 20%);
+}
+
+.app-shell .calendar-day span {
+  color: #43558d;
+  font-size: calc(0.62rem * var(--text-scale));
+}
+
+.app-shell .calendar-day strong {
+  color: var(--appearance-ink);
+}
+
+.app-shell .calendar-day small {
+  color: #7b8ebf;
+  font-size: calc(0.62rem * var(--text-scale));
+  font-weight: 600;
+}
+
+.app-shell .calendar-day.has-task:not(.is-today) {
+  border: 1px solid #b8c7e6;
+}
+
+.app-shell .calendar-day.has-task:hover {
+  background: linear-gradient(145deg, #ffffff, #e2ecff);
+}
+
+.app-shell .calendar-day.is-today {
+  border-color: #d9efff;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgb(109 231 255 / 75%), transparent 60%),
+    linear-gradient(160deg, #20aaff, #2d75ff 55%, #4654f5);
+  box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 65%),
+    inset 0 -2px 3px rgb(44 67 179 / 18%),
+    0 7px 18px -7px rgb(54 87 176 / 32%);
+}
+
+.app-shell .calendar-day.is-today.has-task:hover {
+  background: linear-gradient(160deg, #3abaff, #3a80ff 55%, #5361fc);
+}
+
+.app-shell .calendar-day.is-today span,
+.app-shell .calendar-day.is-today strong,
+.app-shell .calendar-day.is-today small {
+  color: #ffffff;
+}
+
+.app-shell .next-task,
+.app-shell .calendar-stat {
+  border-color: var(--appearance-border);
+  border-radius: 13px;
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 6px 18px -10px rgb(57 76 116 / 20%);
+}
+
+.app-shell .next-task > span,
+.app-shell .next-task p,
+.app-shell .calendar-stat span {
+  color: var(--appearance-muted);
+}
+
+.app-shell .next-task .next-task-tags {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.app-shell .next-task > span {
+  font-size: calc(0.8rem * var(--text-scale));
+  font-weight: 700;
+}
+
+.app-shell .next-task > span time {
+  color: #5665ad;
+}
+
+.app-shell .next-task-button {
+  font-size: calc(1.05rem * var(--text-scale));
+}
+
+.app-shell .calendar-stat strong,
+.app-shell .next-task-button,
+.app-shell .upcoming-task {
+  color: var(--appearance-ink);
+}
+
+.app-shell .calendar-stat-today {
+  border-color: #e1f0e9;
+  background: linear-gradient(145deg, #f7fcfa, #eaf5ef);
+}
+
+.app-shell .calendar-stat-today span {
+  color: #5a8174;
+}
+
+.app-shell .calendar-stat-today strong {
+  color: #3c6d5c;
+}
+
+.app-shell .calendar-stat-week {
+  border-color: #eee7f9;
+  background: linear-gradient(145deg, #fbf9ff, #f0ebf9);
+}
+
+.app-shell .calendar-stat-week span {
+  color: #80709c;
+}
+
+.app-shell .calendar-stat-week strong {
+  color: #685386;
+}
+
+.app-shell .upcoming-item time {
+  border: 1px solid var(--appearance-border);
+  border-radius: 9px;
+  background: linear-gradient(145deg, #ffffff, #edf3ff);
+  box-shadow: inset 0 1px 0 #ffffff;
+  color: var(--appearance-muted);
+}
+
+.app-shell .upcoming-task,
+.app-shell .next-task-button {
+  border: 1px solid transparent;
+  border-radius: 9px;
+}
+
+.app-shell .upcoming-task:hover,
+.app-shell .upcoming-task.is-selected,
+.app-shell .next-task-button:hover {
+  border-color: #d5e1fb;
+  background: #f8fbff;
+  box-shadow: 0 4px 12px -6px rgb(57 76 116 / 18%);
+}
+
+.app-shell .next-task-button[aria-pressed="true"] {
+  border-color: #d5e1fb;
+  background: #f8fbff;
+}
+
+.app-shell .app-main-calendar {
+  --page-gutter: clamp(1rem, 2vw, 1.5rem);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100dvh;
+  padding-bottom: 1rem;
+}
+
+.app-shell .app-main-calendar > .app-header {
+  flex: 0 0 auto;
+}
+
+.app-shell .calendar-view {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  gap: 0.75rem;
+  padding: 0;
+}
+
+.app-shell .calendar-view-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--appearance-border);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(255 255 255 / 95%), transparent 75%),
+    linear-gradient(135deg, #edf5ff, #f3f5ff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 12px 30px -8px rgb(91 125 185 / 18%);
+}
+
+.app-shell .calendar-view-title {
+  flex: 0 0 auto;
+  color: var(--appearance-ink);
+}
+
+.app-shell .calendar-view-header {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0 0.25rem;
+}
+
+.app-shell .calendar-view-heading {
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-shell .calendar-view-header-actions {
+  align-items: center;
+}
+
+.app-shell .calendar-month-menu {
+  border-color: var(--appearance-border);
+  background: linear-gradient(145deg, #ffffff, #f0f5ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 14px 36px -8px rgb(43 65 124 / 24%);
+}
+
+.app-shell .calendar-month-options button {
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 4px 12px -8px rgb(57 76 116 / 20%);
+}
+
+.app-shell .calendar-month-options button:hover {
+  background: linear-gradient(145deg, #ffffff, #e5eeff);
+}
+
+.app-shell .calendar-month-options button[aria-pressed="true"] {
+  background: linear-gradient(145deg, #37baff, #5064f0);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 65%);
+}
+
+.app-shell .calendar-view-heading h2 {
+  color: var(--appearance-ink);
+  font-size: calc(clamp(1.1rem, 2vw, 1.45rem) * var(--text-scale));
+}
+
+.app-shell .calendar-view-controls {
+  gap: 0.35rem;
+  min-height: 2.85rem;
+  padding: 0.3rem;
+  border-color: var(--appearance-border);
+  border-radius: 15px;
+  background: rgb(255 255 255 / 55%);
+  box-shadow: inset 0 1px 0 #ffffff, 0 8px 20px -10px rgb(57 76 116 / 16%);
+  color: #45578f;
+}
+
+.app-shell .calendar-view-control,
+.app-shell .calendar-view-today {
+  min-height: 2.25rem;
+  border: 1px solid #e1e8fc;
+  border-radius: 10px;
+  background: linear-gradient(155deg, #ffffff, #f0f4ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 4px 12px -7px rgb(57 76 116 / 20%);
+  transition: background 140ms ease, box-shadow 140ms ease;
+}
+
+.app-shell .calendar-view-control {
+  width: 2.25rem;
+}
+
+.app-shell .calendar-view-control:hover {
+  border-color: #bdccef;
+  background: linear-gradient(155deg, #ffffff, #e4edff);
+}
+
+.app-shell .calendar-view-today {
+  gap: 0.4rem;
+  padding: 0 0.75rem;
+  border-color: #b3d7ff;
+  background:
+    radial-gradient(ellipse at 10% 0%, rgb(109 231 255 / 70%), transparent 65%),
+    linear-gradient(155deg, #25a5ff, #5064f0);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 65%), 0 5px 16px -8px rgb(43 65 124 / 28%);
+  color: #ffffff;
+  font-size: calc(0.8rem * var(--text-scale));
+}
+
+.app-shell .calendar-view-today:hover {
+  background: linear-gradient(155deg, #3bb3ff, #6072f5);
+}
+
+.app-shell .calendar-view-control:active,
+.app-shell .calendar-view-today:active {
+  box-shadow: inset 0 1px 4px rgb(43 65 124 / 18%);
+}
+
+.app-shell .calendar-view-month {
+  display: grid;
+  flex: 1;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  padding: 0.15rem 0.2rem 0.4rem;
+  overflow-y: hidden;
+  scrollbar-color: #c0cdea transparent;
+  scrollbar-width: thin;
+}
+
+.app-shell .calendar-view-weekdays,
+.app-shell .calendar-view-grid {
+  min-width: 52.5rem;
+  gap: 0.4rem;
+}
+
+.app-shell .calendar-view-weekdays {
+  padding: 0 0 0.4rem;
+}
+
+.app-shell .calendar-view-weekdays span {
+  color: var(--appearance-muted);
+  font-size: calc(0.75rem * var(--text-scale));
+  text-transform: none;
+}
+
+.app-shell .calendar-view-grid {
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+
+.app-shell .calendar-view-date {
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  gap: 0.3rem;
+  padding: 0.4rem;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 95%);
+  border-radius: 13px;
+  background: linear-gradient(150deg, rgb(255 255 255 / 92%), #f5f8ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 5px 14px -9px rgb(57 76 116 / 15%);
+}
+
+.app-shell .calendar-view-date.is-muted {
+  background: rgb(231 238 251 / 45%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 65%);
+}
+
+.app-shell .calendar-view-date.is-muted time {
+  color: #8f9dbe;
+}
+
+.app-shell .calendar-view-date.is-today {
+  border-color: #c2d5fb;
+  background: linear-gradient(145deg, #f5fbff, #e6eeff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 6px 18px -10px rgb(57 76 116 / 20%);
+}
+
+.app-shell .calendar-view-date time {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9px;
+  color: #526495;
+  font-size: calc(0.76rem * var(--text-scale));
+}
+
+.app-shell .calendar-view-date.is-today time {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgb(109 231 255 / 75%), transparent 60%),
+    linear-gradient(160deg, #20aaff, #4654f5);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 65%), 0 5px 12px -6px rgb(54 87 176 / 28%);
+  color: #ffffff;
+}
+
+.app-shell .calendar-view-date-tasks {
+  align-content: start;
+  gap: 0.3rem;
+  min-height: 0;
+  padding: 0.05rem 0.1rem 0.15rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c0cdea transparent;
+}
+
+.app-shell .calendar-view-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  justify-content: stretch;
+  gap: 0.35rem;
+  min-height: 1.85rem;
+  padding: 0.35rem 0.4rem;
+  border-color: #e0e8fb;
+  border-radius: 10px;
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 5px 12px -8px rgb(57 76 116 / 20%);
+  color: var(--appearance-ink);
+  font-size: calc(0.82rem * var(--text-scale));
+  font-weight: 750;
+  line-height: 1.3;
+  white-space: normal;
+}
+
+.app-shell .calendar-view-task:has(.calendar-view-task-tags) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.app-shell .calendar-view-task-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.app-shell .calendar-view-task-tags {
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 0;
+  max-width: 2rem;
+  margin: 0;
+}
+
+.app-shell .calendar-view-tag-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 65%), 0 1px 3px rgb(57 76 116 / 15%);
+}
+
+.app-shell .calendar-view-task:hover,
+.app-shell .calendar-view-task.is-selected {
+  border-color: #a9bfe9;
+  background: linear-gradient(150deg, #ffffff, #eaf1ff);
+  color: #283b7a;
+}
+
+.app-shell .calendar-view-task.is-complete {
+  border-color: #e2e7f1;
+  background: linear-gradient(150deg, #f7f9fc, #eef2f8);
+  color: #7d8ba8;
+  text-decoration: none;
+}
+
+.app-shell .calendar-view-task.is-complete .calendar-view-task-title {
+  text-decoration: line-through;
+}
+
+.app-shell .empty-state,
+.app-shell .task-search-empty {
+  border-color: #c9d8f4;
+  border-radius: 13px;
+  background: rgb(255 255 255 / 65%);
+  color: var(--appearance-muted);
+}
+
+.app-shell .trash-view {
+  width: min(56rem, 100%);
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.app-shell .trash-toolbar {
+  padding-top: 1.25rem;
+}
+
+.app-shell .trash-header {
+  padding: 1.5rem 0 1.25rem;
+}
+
+.app-shell .trash-header h1 {
+  color: var(--appearance-ink);
+}
+
+.app-shell .trash-header p {
+  color: var(--appearance-muted);
+  font-size: calc(0.86rem * var(--text-scale));
+  line-height: 1.5;
+}
+
+.app-shell .trash-sort-control select {
+  min-height: 2.85rem;
+  border-color: var(--appearance-border);
+  border-radius: 13px;
+  background: linear-gradient(155deg, #ffffff, #f1f5ff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 9px 24px -8px rgb(57 76 116 / 20%);
+  color: var(--appearance-ink);
+  font-size: calc(0.8rem * var(--text-scale));
+}
+
+.app-shell .trash-sort-control select:hover {
+  border-color: #dce6ff;
+  background: linear-gradient(155deg, #ffffff, #e9f0ff);
+}
+
+.app-shell .trash-list {
+  gap: 0.8rem;
+  padding: 1.15rem;
+  border: 1px solid var(--appearance-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgb(255 255 255 / 95%), transparent 75%),
+    linear-gradient(135deg, #edf5ff, #e7efff);
+  box-shadow: inset 0 1px 1px #ffffff, 0 12px 30px -8px rgb(91 125 185 / 18%);
+}
+
+.app-shell .trash-task {
+  gap: 1rem 1.25rem;
+  padding: 1rem 1.1rem;
+  border-color: var(--appearance-border);
+  border-radius: 13px;
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 7px 20px -8px rgb(91 139 226 / 18%);
+}
+
+.app-shell .trash-task-heading h2 {
+  color: var(--appearance-ink);
+  font-size: calc(1rem * var(--text-scale));
+  font-weight: 800;
+}
+
+.app-shell .trash-task-description {
+  margin-top: 0.5rem;
+  color: #6c7ba3;
+  font-size: calc(0.86rem * var(--text-scale));
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .trash-task-meta {
+  gap: 0.45rem 0.8rem;
+  margin-top: 0;
+  color: var(--appearance-muted);
+  font-size: calc(0.75rem * var(--text-scale));
+}
+
+.app-shell .trash-deleted-date {
+  color: var(--appearance-muted);
+}
+
+.app-shell .trash-task-details .trash-retention {
+  border-color: #e3eafb;
+}
+
+.app-shell .trash-expiration {
+  padding: 0.2rem 0.45rem;
+  border: 1px solid #f6e7e0;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #fffaf6, #fff0e9);
+  color: #a06d58;
+  font-size: calc(0.65rem * var(--text-scale));
+  font-weight: 600;
+}
+
+.app-shell .trash-task-actions {
+  gap: 0.9rem;
+  min-width: 0;
+  max-width: 25rem;
+  justify-content: flex-end;
+}
+
+.app-shell .trash-task-tags {
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 9rem;
+  margin: 0;
+}
+
+.app-shell .trash-task-tags .tag-pill {
+  max-width: 100%;
+}
+
+.app-shell .trash-task-tags .tag-pill > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .trash-restore-button,
+.app-shell .trash-delete-button,
+.app-shell .trash-reset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.2rem;
+  padding: 0.45rem 0.65rem;
+  border-color: #e1e8ff;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #ffffff, #eef3ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 6px 16px -6px rgb(57 76 116 / 20%);
+  color: #283878;
+  font-size: calc(0.72rem * var(--text-scale));
+  font-weight: 750;
+}
+
+.app-shell .trash-delete-button {
+  border-color: #f8e1e8;
+  background: linear-gradient(180deg, #ffffff, #fff0f4);
+  color: #a63657;
+}
+
+.app-shell .trash-action-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.app-shell .trash-restore-button:hover,
+.app-shell .trash-reset-button:hover {
+  border-color: #b8cafa;
+  background: linear-gradient(180deg, #ffffff, #e4edff);
+}
+
+.app-shell .trash-delete-button:hover {
+  border-color: #efbccb;
+  background: linear-gradient(180deg, #ffffff, #ffe6ed);
+}
+
+.app-shell .trash-restore-button:active,
+.app-shell .trash-delete-button:active,
+.app-shell .trash-reset-button:active {
+  box-shadow: inset 0 1px 3px rgb(57 76 116 / 14%);
+}
+
+.app-shell .trash-empty-state,
+.app-shell .trash-message {
+  padding: 1.5rem;
+  border-color: var(--appearance-border);
+  border-style: solid;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f5faff, #edf2ff);
+  box-shadow: inset 0 1px 0 #ffffff, 0 10px 26px -10px rgb(91 125 185 / 18%);
+  color: var(--appearance-muted);
+}
+
+.app-shell .trash-empty-state h2 {
+  color: var(--appearance-ink);
+}
+
+.app-shell .trash-message.is-error {
+  border-color: #f5c5d1;
+  background: linear-gradient(135deg, #fffafb, #fff0f4);
+  color: #a63657;
+}
+
+.app-shell .task-form {
+  border-color: #dce6fc;
+  border-radius: 13px;
+  background: var(--appearance-card);
+}
+
+.app-shell .task-section.is-search-result {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell .task-section.is-collapsed .task-section-header {
+  margin-bottom: 0;
+}
+
+.app-shell .font-control {
+  border-color: var(--appearance-border);
+  background: var(--appearance-card);
+  box-shadow: inset 0 1px 0 #ffffff, 0 8px 24px rgb(91 139 226 / 12%);
+}
+
+@media (min-width: 901px) and (max-width: 1480px) {
+  .app-shell {
+    --right-column-width: calc((100% - 1rem) / 2);
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell:has(> .app-main-calendar) {
+    height: 100dvh;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .app-shell .app-main-calendar {
+    height: auto;
+  }
+
+  .app-shell {
+    --right-column-width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell .app-sidebar {
+    height: auto;
+    min-width: 0;
+    padding: 1rem;
+    border-right: 0;
+    border-radius: 0 0 20px 20px;
+    box-shadow: inset 0 -1px 1px #ffffff, 0 12px 28px -22px rgb(62 87 141 / 25%);
+    overflow: visible;
+  }
+
+  .app-shell .sidebar-nav {
+    gap: 0.5rem;
+    padding: 0.3rem 0.25rem 0.6rem;
+  }
+
+  .app-shell .sidebar-nav-item {
+    grid-template-columns: 2.15rem auto;
+    gap: 0.6rem;
+    flex-shrink: 0;
+    min-height: 3.4rem;
+    padding: 0.45rem 0.7rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell .trash-task-actions {
+    max-width: none;
+  }
+
+  .app-shell .calendar-view-panel {
+    padding: 1rem;
+  }
+
+  .app-shell .calendar-view-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-shell .calendar-view-header-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .app-shell .calendar-view-controls {
+    flex: 1 0 auto;
+    width: auto;
+    justify-content: space-between;
+  }
+
+  .app-shell .dashboard-card-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.85rem 0.75rem;
+  }
+
+  .app-shell .task-search {
+    grid-column: 1 / -1;
+  }
+
+  .app-shell .dashboard-card-actions > .tag-filter {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .app-shell .dashboard-card-actions > .tag-manager {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+}
+
+@media (max-width: 600px) {
+  .app-shell .task-card {
+    grid-template-columns: 1.4rem minmax(0, 1fr);
+  }
+
+  .app-shell .task-actions {
+    grid-column: 2;
+    justify-self: end;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 460px) {
+  .app-shell .task-inline-editor {
+    --inline-column-gap: 0.9rem;
+  }
+
+  .app-shell .trash-list {
+    padding: 0.85rem;
+  }
+
+  .app-shell .trash-task {
+    padding: 0.85rem;
+  }
+
+  .app-shell .trash-task-tags {
+    align-self: flex-end;
+    max-width: 100%;
+  }
+
+  .app-shell .task-section {
+    padding: 0.85rem;
+  }
+
+  .app-shell .task-card {
+    grid-template-columns: 1.4rem minmax(0, 1fr);
+    gap: 0.6rem 0.9rem;
+    padding: 0.85rem;
+  }
+
+  .app-shell .task-actions {
+    grid-column: 2;
+    justify-self: end;
+    max-width: 100%;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .app-shell .task-section.is-search-result {
+    padding: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .sidebar-nav-item,
+  .app-shell .calendar-view-control,
+  .app-shell .calendar-view-today,
+  .app-shell .task-primary-button,
+  .app-shell .task-cancel-button,
+  .app-shell .tag-panel-primary,
+  .app-shell .tag-panel-cancel,
+  .app-shell .tag-filter > summary,
+  .app-shell .tag-manager > summary {
+    transition: none;
+  }
+}

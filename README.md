@@ -17,7 +17,7 @@ server-backed sessions, automated tests, Docker, and continuous integration.
 
 ### Task planning
 
-- Create, edit, complete, and delete tasks with due dates.
+- Create, complete, and delete tasks with dates, and edit tasks directly in their cards.
 - Separate past-due, today, upcoming, and completed task sections.
 - Search tasks and preserve each account's collapsed section preferences.
 - Track consecutive days with at least one completed task.
@@ -31,7 +31,7 @@ server-backed sessions, automated tests, Docker, and continuous integration.
 - Create reusable account-owned tags with custom colors.
 - Assign multiple tags while creating or editing a task.
 - Filter dashboard, calendar, and Trash results by tag.
-- Reorder tag priority or disable priority-based ordering.
+- Reorder tag priority to sort tasks within each date, or disable priority ordering.
 - Sort deleted tasks by their task date or deletion date.
 
 ### Accounts and recovery
@@ -39,6 +39,7 @@ server-backed sessions, automated tests, Docker, and continuous integration.
 - Register and sign in with a username and password.
 - Add an optional email address and use it as a sign-in identifier.
 - Keep tasks, tags, sessions, and interface preferences isolated per account.
+- Choose Nunito, Pilcrow Rounded, or Poppins as the interface font.
 - Change passwords while signed in and revoke other active sessions.
 - Recover an account with a one-time recovery code when email delivery is not
   configured.

@@ -1,10 +1,10 @@
-import { TaskForm } from "./TaskForm";
+import { TaskInlineEditor } from "./TaskInlineEditor";
 import { TagPill } from "../../tags/components/TagPill";
 import type { Tag, TagInput } from "../../tags/types";
 import type { NewTaskInput, Task } from "../types";
 import {
   compareDateValues,
-  formatDueDate,
+  formatSectionDate,
   getTodayDateValue,
 } from "../utils/date";
 
@@ -42,18 +42,17 @@ export function TaskCard({
   if (isEditing) {
     return (
       <article
-        className="task-card task-card-form"
+        className={`task-card task-card-inline${task.completed ? " is-complete" : ""}${isSelected ? " is-selected" : ""}`}
         id={`task-${task.id}`}
         aria-label={`Editing ${task.title}`}
       >
-        <TaskForm
-          idPrefix={`edit-task-${task.id}`}
-          initialValues={task}
+        <TaskInlineEditor
+          task={task}
           tags={availableTags}
           onAddTag={onAddTag}
-          submitLabel="Save Task"
-          onSubmitTask={(nextTask) => onUpdateTask(task.id, nextTask)}
+          onSave={(nextTask) => onUpdateTask(task.id, nextTask)}
           onCancel={onCancelEditTask}
+          onDelete={() => onDeleteTask(task.id)}
         />
       </article>
     );
@@ -72,24 +71,34 @@ export function TaskCard({
         onClick={() => onToggleTaskCompleted(task.id)}
         aria-label={`${task.completed ? "Move back to Today" : "Complete"} ${task.title}`}
       >
-        {task.completed ? "x" : ""}
+        {task.completed && (
+          <svg
+            className="task-checkbox-icon"
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+          >
+            <path d="m5 10 3 3 7-7" />
+          </svg>
+        )}
       </button>
 
       <div className="task-content">
         <div className="task-title-row">
-          {isPastDue && (
-            <span
-              className="task-overdue-indicator"
-              role="img"
-              aria-label="Past due"
-              title="Past due"
-            >
-              !
-            </span>
-          )}
           <h3>{task.title}</h3>
         </div>
         {task.description && <p className="task-description">{task.description}</p>}
+        {task.dueDate && (
+          <div className="task-meta">
+            <p className={`task-due-date${isPastDue ? " is-overdue" : ""}`}>
+              <time dateTime={task.dueDate}>
+                {formatSectionDate(task.dueDate)}
+              </time>
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="task-actions">
         {task.tags.length > 0 && (
           <div className="task-tags" aria-label="Task tags">
             {task.tags.map((tag) => (
@@ -97,29 +106,16 @@ export function TaskCard({
             ))}
           </div>
         )}
-        {task.dueDate && (
-          <p className={`task-due-date${isPastDue ? " is-overdue" : ""}`}>
-            {formatDueDate(task.dueDate)}
-          </p>
-        )}
-      </div>
-
-      <div className="task-actions">
         <button
           className="task-edit-button"
           type="button"
           onClick={() => onStartEditTask(task.id)}
           aria-label={`Edit ${task.title}`}
         >
+          <svg className="task-action-icon" aria-hidden="true" viewBox="0 0 20 20">
+            <path d="m12.5 4.5 3 3M4 16l1-4L13.5 3.5a2.1 2.1 0 0 1 3 3L8 15l-4 1Z" />
+          </svg>
           Edit
-        </button>
-        <button
-          className="task-delete-button"
-          type="button"
-          onClick={() => onDeleteTask(task.id)}
-          aria-label={`Delete ${task.title}`}
-        >
-          Delete
         </button>
       </div>
     </article>

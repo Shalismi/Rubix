@@ -3,8 +3,8 @@ import { TagFilter } from "../../tags/components/TagFilter";
 import { TagPill } from "../../tags/components/TagPill";
 import type { Tag } from "../../tags/types";
 import type { Task } from "../types";
-import { compareDateValues, formatDueDate } from "../utils/date";
-import { filterTasksByTags } from "../utils/taskFilters";
+import { compareDateValues, formatSectionDate } from "../utils/date";
+import { filterTasksBySearchAndTags } from "../utils/taskFilters";
 
 const TRASH_RETENTION_DAYS = 30;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -51,12 +51,17 @@ export function TrashView({
   onPermanentlyDelete,
 }: TrashViewProps) {
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<TrashSort>("deleted");
   const visibleTasks = useMemo(() => {
-    const filteredTasks = filterTasksByTags(tasks, selectedTagIds);
+    const filteredTasks = filterTasksBySearchAndTags(
+      tasks,
+      searchQuery,
+      selectedTagIds,
+    );
 
     return [...filteredTasks].sort((firstTask, secondTask) => {
-      if (sortBy === "due") {
+      if (sortBy === "due" && firstTask.dueDate !== secondTask.dueDate) {
         if (!firstTask.dueDate) {
           return 1;
         }
@@ -80,7 +85,7 @@ export function TrashView({
         new Date(firstTask.deletedAt ?? 0).getTime()
       );
     });
-  }, [selectedTagIds, sortBy, tasks]);
+  }, [searchQuery, selectedTagIds, sortBy, tasks]);
 
   function confirmPermanentDelete(task: Task) {
     const shouldDelete = window.confirm(
@@ -94,6 +99,34 @@ export function TrashView({
 
   return (
     <main className="trash-view" aria-labelledby="trash-heading">
+      <div className="trash-toolbar">
+        <label className="task-search trash-search">
+          <span className="task-search-icon" aria-hidden="true" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search deleted tasks..."
+            aria-label="Search deleted tasks"
+          />
+        </label>
+        <TagFilter
+          tags={tags}
+          selectedTagIds={selectedTagIds}
+          onChange={setSelectedTagIds}
+        />
+        <label className="trash-sort-control">
+          <span className="visually-hidden">Sort by</span>
+          <select
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value as TrashSort)}
+          >
+            <option value="deleted">Deleted date</option>
+            <option value="due">Task date</option>
+          </select>
+        </label>
+      </div>
+
       <header className="trash-header">
         <div>
           <div className="trash-title-row">
@@ -107,40 +140,34 @@ export function TrashView({
           </div>
           <p>Tasks are permanently deleted 30 days after they enter Trash.</p>
         </div>
-
-        <div className="trash-controls">
-          <TagFilter
-            tags={tags}
-            selectedTagIds={selectedTagIds}
-            onChange={setSelectedTagIds}
-          />
-          <label className="trash-sort-control">
-            <span>Sort by</span>
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as TrashSort)}
-            >
-              <option value="deleted">Deleted date</option>
-              <option value="due">Task due date</option>
-            </select>
-          </label>
-        </div>
       </header>
 
       {isLoading && <p className="trash-message">Loading deleted tasks...</p>}
-      {error && <p className="trash-message is-error">{error}</p>}
+      {error && (
+        <p className="trash-message is-error" role="alert">{error}</p>
+      )}
 
-      {!isLoading && tasks.length === 0 && (
+      {!isLoading && !error && tasks.length === 0 && (
         <div className="trash-empty-state">
           <h2>Trash is empty</h2>
           <p>Tasks you delete will appear here for 30 days.</p>
         </div>
       )}
 
-      {!isLoading && tasks.length > 0 && visibleTasks.length === 0 && (
-        <div className="trash-empty-state">
+      {!isLoading && !error && tasks.length > 0 && visibleTasks.length === 0 && (
+        <div className="trash-empty-state" role="status">
           <h2>No matching tasks</h2>
-          <p>No deleted tasks use the selected tags.</p>
+          <p>Try another search or adjust the tag filter.</p>
+          <button
+            className="trash-reset-button"
+            type="button"
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedTagIds([]);
+            }}
+          >
+            Clear search and filters
+          </button>
         </div>
       )}
 
@@ -150,50 +177,80 @@ export function TrashView({
             const daysRemaining = getDaysRemaining(task.deletedAt);
 
             return (
-              <article className="trash-task" key={task.id}>
+              <article className="trash-task" key={task.id} aria-label={task.title}>
                 <div className="trash-task-content">
                   <div className="trash-task-heading">
                     <h2>{task.title}</h2>
-                    <span className="trash-expiration">
-                      {daysRemaining === 1
-                        ? "1 day remaining"
-                        : `${daysRemaining} days remaining`}
-                    </span>
                   </div>
 
                   {task.description && (
                     <p className="trash-task-description">{task.description}</p>
                   )}
 
-                  <div className="trash-task-meta">
-                    {task.dueDate && <span>{formatDueDate(task.dueDate)}</span>}
-                    <span>{formatDeletedDate(task.deletedAt)}</span>
+                  <div className="trash-task-details">
+                    {task.dueDate && (
+                      <div className="trash-task-meta">
+                        <time dateTime={task.dueDate}>
+                          {formatSectionDate(task.dueDate)}
+                        </time>
+                      </div>
+                    )}
+                    <div className="trash-retention">
+                      <span className="trash-deleted-date">
+                        {formatDeletedDate(task.deletedAt)}
+                      </span>
+                      <span className="trash-expiration">
+                        {daysRemaining === 1
+                          ? "1 day remaining"
+                          : `${daysRemaining} days remaining`}
+                      </span>
+                    </div>
                   </div>
+                </div>
 
+                <div className="trash-task-actions">
                   {task.tags.length > 0 && (
-                    <div className="trash-task-tags" aria-label="Task tags">
+                    <div
+                      className="task-tags trash-task-tags"
+                      aria-label="Task tags"
+                    >
                       {task.tags.map((tag) => (
                         <TagPill key={tag.id} tag={tag} />
                       ))}
                     </div>
                   )}
-                </div>
-
-                <div className="trash-task-actions">
-                  <button
-                    className="trash-restore-button"
-                    type="button"
-                    onClick={() => onRestore(task.id)}
-                  >
-                    Restore
-                  </button>
-                  <button
-                    className="trash-delete-button"
-                    type="button"
-                    onClick={() => confirmPermanentDelete(task)}
-                  >
-                    Delete permanently
-                  </button>
+                  <div className="trash-task-buttons">
+                    <button
+                      className="trash-restore-button"
+                      type="button"
+                      onClick={() => onRestore(task.id)}
+                      aria-label={`Restore ${task.title}`}
+                    >
+                      <svg
+                        className="trash-action-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path d="M4 10a8 8 0 1 1 1 8M4 4v6h6M12 8v5l3 2" />
+                      </svg>
+                      Restore
+                    </button>
+                    <button
+                      className="trash-delete-button"
+                      type="button"
+                      onClick={() => confirmPermanentDelete(task)}
+                      aria-label={`Permanently delete ${task.title}`}
+                    >
+                      <svg
+                        className="trash-action-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path d="M4 7h16M9 7V4h6v3M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M10 11v6M14 11v6" />
+                      </svg>
+                      Delete permanently
+                    </button>
+                  </div>
                 </div>
               </article>
             );

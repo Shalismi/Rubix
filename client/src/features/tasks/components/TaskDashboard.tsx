@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarPanel } from "./CalendarPanel";
 import { TaskForm } from "./TaskForm";
 import { TaskSection } from "./TaskSection";
@@ -58,6 +58,8 @@ function getSavedOpenSections(userId: number): OpenTaskSections {
 
 type TaskDashboardProps = {
   userId: number;
+  username: string;
+  welcomeMessage: string;
   activeTasks: Task[];
   completedTasks: Task[];
   editingTaskId: number | null;
@@ -77,9 +79,9 @@ type TaskDashboardProps = {
   onAddTask: (task: NewTaskInput) => void;
   onCancelAddTask: () => void;
   onCancelEditTask: () => void;
-  onClearSelectedTask: () => void;
   onDeleteTask: (taskId: number) => void;
   onSelectTask: (taskId: number) => void;
+  onOpenCalendar: () => void;
   onStartEditTask: (taskId: number) => void;
   onToggleAddTask: () => void;
   onToggleTaskCompleted: (taskId: number) => void;
@@ -94,6 +96,8 @@ type TaskDashboardProps = {
 
 export function TaskDashboard({
   userId,
+  username,
+  welcomeMessage,
   activeTasks,
   completedTasks,
   editingTaskId,
@@ -113,9 +117,9 @@ export function TaskDashboard({
   onAddTask,
   onCancelAddTask,
   onCancelEditTask,
-  onClearSelectedTask,
   onDeleteTask,
   onSelectTask,
+  onOpenCalendar,
   onStartEditTask,
   onToggleAddTask,
   onToggleTaskCompleted,
@@ -181,32 +185,25 @@ export function TaskDashboard({
     }));
   }
 
-  function handleDashboardClick(event: MouseEvent<HTMLElement>) {
-    if (!(event.target instanceof Element)) {
-      return;
-    }
-
-    const shouldKeepSelection = event.target.closest(
-      "button, input, textarea, form, .task-card, .calendar-panel, .task-search",
-    );
-
-    if (!shouldKeepSelection) {
-      onClearSelectedTask();
-    }
-  }
-
   return (
-    <main className="dashboard" onClick={handleDashboardClick}>
+    <main className="dashboard">
       <div className="dashboard-layout">
         <section className="dashboard-card" aria-labelledby="tasks-heading">
-          <div className="dashboard-card-header">
-            <div>
-              <h2 id="tasks-heading">My Tasks</h2>
-              <p>Plan the next few things that need your attention.</p>
-              {isLoadingTasks && <p>Loading tasks...</p>}
-              {taskError && <p className="dashboard-error">{taskError}</p>}
+          <header className="dashboard-welcome">
+            <div className="dashboard-welcome-copy">
+              <h1 id="tasks-heading">Welcome {username},</h1>
+              <p className="dashboard-welcome-message">{welcomeMessage}</p>
             </div>
-
+            <button
+              className="primary-button task-primary-button dashboard-add-button"
+              type="button"
+              onClick={onToggleAddTask}
+              aria-expanded={isAddingTask}
+            >
+              {isAddingTask ? "Close Form" : "+ Add Task"}
+            </button>
+          </header>
+          <div className="dashboard-card-header">
             <div className="dashboard-card-actions">
               <label className="task-search">
                 <span className="task-search-icon" aria-hidden="true" />
@@ -237,22 +234,14 @@ export function TaskDashboard({
                 onPriorityEnabledChange={onTagPriorityEnabledChange}
                 onRemoveTag={onRemoveTag}
               />
-
-              <button
-                className="primary-button"
-                type="button"
-                onClick={onToggleAddTask}
-                aria-expanded={isAddingTask}
-              >
-                {isAddingTask ? "Close Form" : "+ Add Task"}
-              </button>
             </div>
           </div>
 
+          {isLoadingTasks && <p className="dashboard-status">Loading tasks...</p>}
+          {taskError && <p className="dashboard-status dashboard-error" role="alert">{taskError}</p>}
+
           {isAddingTask && (
             <TaskForm
-              idPrefix="new-task"
-              submitLabel="Add Task"
               tags={tags}
               onAddTag={onAddTag}
               onSubmitTask={onAddTask}
@@ -348,6 +337,7 @@ export function TaskDashboard({
             selectedTaskId={selectedTaskId}
             tasks={filteredActiveTasks}
             onSelectTask={onSelectTask}
+            onOpenCalendar={onOpenCalendar}
           />
         </div>
       </div>

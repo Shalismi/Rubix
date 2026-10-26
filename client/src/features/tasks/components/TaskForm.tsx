@@ -1,38 +1,26 @@
 import { useState, type FormEvent } from "react";
 import { TagPicker } from "../../tags/components/TagPicker";
 import type { Tag, TagInput } from "../../tags/types";
-import type { NewTaskInput, Task } from "../types";
+import type { NewTaskInput } from "../types";
 import { getDefaultDueDate } from "../utils/date";
 
 type TaskFormProps = {
-  idPrefix: string;
-  submitLabel: string;
   tags: Tag[];
-  initialValues?: Task;
   onAddTag: (tag: TagInput) => Promise<Tag | null>;
   onSubmitTask: (task: NewTaskInput) => void;
   onCancel: () => void;
 };
 
 export function TaskForm({
-  idPrefix,
-  submitLabel,
   tags,
-  initialValues,
   onAddTag,
   onSubmitTask,
   onCancel,
 }: TaskFormProps) {
-  const [title, setTitle] = useState(initialValues?.title ?? "");
-  const [description, setDescription] = useState(
-    initialValues?.description ?? "",
-  );
-  const [dueDate, setDueDate] = useState(
-    getDefaultDueDate(initialValues?.dueDate),
-  );
-  const [selectedTagIds, setSelectedTagIds] = useState(
-    initialValues?.tags.map((tag) => tag.id) ?? [],
-  );
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState(getDefaultDueDate);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,12 +33,8 @@ export function TaskForm({
 
     const nextTask: NewTaskInput = {
       title: trimmedTitle,
+      description: description.trim(),
     };
-    const trimmedDescription = description.trim();
-
-    if (trimmedDescription) {
-      nextTask.description = trimmedDescription;
-    }
 
     nextTask.dueDate = getDefaultDueDate(dueDate);
     nextTask.tagIds = selectedTagIds;
@@ -61,9 +45,9 @@ export function TaskForm({
   return (
     <form className="task-form" onSubmit={handleSubmit}>
       <div className="form-field">
-        <label htmlFor={`${idPrefix}-title`}>Task title</label>
+        <label htmlFor="new-task-title">Task title</label>
         <input
-          id={`${idPrefix}-title`}
+          id="new-task-title"
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
@@ -73,9 +57,9 @@ export function TaskForm({
       </div>
 
       <div className="form-field">
-        <label htmlFor={`${idPrefix}-description`}>Description</label>
+        <label htmlFor="new-task-description">Description</label>
         <textarea
-          id={`${idPrefix}-description`}
+          id="new-task-description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Optional notes"
@@ -92,9 +76,9 @@ export function TaskForm({
 
       <div className="form-row">
         <div className="form-field">
-          <label htmlFor={`${idPrefix}-due-date`}>Due date</label>
+          <label htmlFor="new-task-due-date">Date</label>
           <input
-            id={`${idPrefix}-due-date`}
+            id="new-task-due-date"
             type="date"
             value={dueDate}
             onChange={(event) => setDueDate(event.target.value)}
@@ -102,14 +86,23 @@ export function TaskForm({
         </div>
 
         <div className="form-actions">
-          <button className="secondary-button" type="button" onClick={onCancel}>
+          <button
+            className="secondary-button task-cancel-button"
+            type="button"
+            onClick={onCancel}
+          >
             Cancel
           </button>
-          <button className="primary-button" type="submit" disabled={!title.trim()}>
-            {submitLabel}
+          <button
+            className="primary-button task-primary-button"
+            type="submit"
+            disabled={!title.trim()}
+          >
+            Add Task
           </button>
         </div>
       </div>
+
     </form>
   );
 }

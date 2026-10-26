@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getWelcomeMessage, startWelcomeSession } from "../../../app/config/welcome";
 import {
   getCurrentUser,
   login as loginRequest,
@@ -19,6 +20,7 @@ function getMessage(error: unknown) {
 
 export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [welcomeMessage, setWelcomeMessage] = useState("");
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -32,6 +34,7 @@ export function useAuth() {
     getCurrentUser()
       .then((currentUser) => {
         if (isActive) {
+          if (currentUser) setWelcomeMessage(getWelcomeMessage(currentUser.id));
           setUser(currentUser);
         }
       })
@@ -57,6 +60,7 @@ export function useAuth() {
 
     try {
       const authenticatedUser = await loginRequest(credentials);
+      setWelcomeMessage(startWelcomeSession(authenticatedUser.id));
       setRegistrationRecoveryCode(null);
       setUser(authenticatedUser);
     } catch (error) {
@@ -72,6 +76,7 @@ export function useAuth() {
 
     try {
       const result = await registerRequest(credentials);
+      setWelcomeMessage(startWelcomeSession(result.user.id));
       setRegistrationRecoveryCode(result.recoveryCode);
       setUser(result.user);
     } catch (error) {
@@ -89,6 +94,7 @@ export function useAuth() {
       await logoutRequest();
       setRegistrationRecoveryCode(null);
       setUser(null);
+      setWelcomeMessage("");
     } catch (error) {
       setAuthError(getMessage(error));
     } finally {
@@ -102,6 +108,7 @@ export function useAuth() {
     isSubmitting,
     registrationRecoveryCode,
     user,
+    welcomeMessage,
     clearAuthError: () => setAuthError(null),
     dismissRegistrationRecoveryCode: () =>
       setRegistrationRecoveryCode(null),

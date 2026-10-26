@@ -1,7 +1,9 @@
+import rubixCubeLogo from "../../assets/rubix-cube.png";
+
 export type AppView = "dashboard" | "calendar" | "trash" | "settings";
 
 type NavItem = {
-  view?: AppView;
+  view: AppView;
   label: string;
   icon: "main" | "calendar" | "trash" | "settings";
 };
@@ -17,7 +19,10 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
   if (icon === "main") {
     return (
       <svg aria-hidden="true" viewBox="0 0 24 24">
-        <path d="M4 10.5 12 4l8 6.5V20h-5v-5H9v5H4v-9.5Z" />
+        <rect x="4" y="4" width="6" height="6" rx="1.5" />
+        <rect x="14" y="4" width="6" height="6" rx="1.5" />
+        <rect x="4" y="14" width="6" height="6" rx="1.5" />
+        <rect x="14" y="14" width="6" height="6" rx="1.5" />
       </svg>
     );
   }
@@ -25,8 +30,8 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
   if (icon === "calendar") {
     return (
       <svg aria-hidden="true" viewBox="0 0 24 24">
-        <path d="M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
-        <path d="M8 3v4M16 3v4M4 10h16" />
+        <rect x="4" y="5" width="16" height="15" rx="3" />
+        <path d="M8 3v4M16 3v4M4 10h16M8 14h2M14 14h2M8 17h2" />
       </svg>
     );
   }
@@ -34,15 +39,15 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
   if (icon === "trash") {
     return (
       <svg aria-hidden="true" viewBox="0 0 24 24">
-        <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+        <path d="M4 7h16M9 7V4h6v3M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M10 11v6M14 11v6" />
       </svg>
     );
   }
 
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24">
-      <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" />
-      <path d="M12 3v3M12 18v3M4.2 6.5l2.1 2.1M17.7 15.4l2.1 2.1M3 12h3M18 12h3M4.2 17.5l2.1-2.1M17.7 8.6l2.1-2.1" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="m9 3-.5 2-1.6.9L5 5.3 2.8 9l1.5 1.5v3L2.8 15 5 18.7l1.9-.6 1.6.9.5 2h6l.5-2 1.6-.9 1.9.6 2.2-3.7-1.5-1.5v-3L21.2 9 19 5.3l-1.9.6-1.6-.9-.5-2H9Z" />
     </svg>
   );
 }
@@ -62,11 +67,8 @@ function SidebarNavItem({
     <button
       className={`sidebar-nav-item${isActive ? " is-active" : ""}`}
       type="button"
-      onClick={() => {
-        if (item.view) {
-          onSelectView(item.view);
-        }
-      }}
+      aria-current={isActive ? "page" : undefined}
+      onClick={() => onSelectView(item.view)}
     >
       <span className="sidebar-nav-icon">
         <SidebarIcon icon={item.icon} />
@@ -85,7 +87,13 @@ export function AppSidebar({ activeView, onSelectView }: AppSidebarProps) {
   return (
     <aside className="app-sidebar" aria-label="Rubix navigation">
       <div className="sidebar-brand">
-        <span className="sidebar-logo-mark" aria-hidden="true" />
+        <img
+          className="sidebar-logo-image"
+          src={rubixCubeLogo}
+          alt=""
+          width={48}
+          height={48}
+        />
         <span>Rubix</span>
       </div>
 

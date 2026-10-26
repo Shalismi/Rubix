@@ -33,6 +33,8 @@ Connects the main app layout together.
 App-level pieces that are not specific to one feature.
 
 - `components`: the sidebar and top account/header area.
+- `config`: font choices and rotating welcome messages.
+- `hooks`: saved font preferences for each account.
 
 `client/src/config`
 Shared client configuration, including the environment-based API address.
@@ -45,7 +47,7 @@ helper and consistent server error handling.
 Account API requests, session state, registration, and sign-in UI.
 
 `client/src/features/settings`
-Logged-in account settings, including password changes.
+Logged-in font and account settings, including password changes.
 
 `client/src/features/streaks`
 Loads account streak data and displays the current count plus weekly activity.
@@ -62,14 +64,23 @@ Reusable account-owned tags, colors, saved priority order, and filtering.
 Everything for the task feature.
 
 - `api`: browser requests to the task API.
-- `components`: task dashboard, task cards, task form, sections, calendar panel,
-  and Trash screen.
+- `components`: task dashboard, cards with inline editing, add-task form,
+  sections, calendar views, and Trash screen.
 - `hooks`: active and deleted task state plus task actions.
-- `utils`: date formatting and task grouping helpers.
+- `utils`: date formatting, task grouping, and tag-priority sorting.
 - `types.ts`: task TypeScript shapes used by the task feature.
 
 `client/src/styles`
-CSS files split by UI area.
+CSS files split by UI area, with the shared app theme in `theme.css`.
+
+`client/public/fonts`
+Locally served font files and their licenses.
+
+`client/src/assets`
+Images used by the app, including the Rubix cube logo.
+
+`client/tests`
+Task-priority regression tests run locally and by CI.
 
 ## Server
 

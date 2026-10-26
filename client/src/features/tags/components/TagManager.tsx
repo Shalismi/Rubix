@@ -93,8 +93,26 @@ export function TagManager({
 
   return (
     <details className="tag-manager" ref={detailsRef}>
-      <summary>Manage tags</summary>
+      <summary>
+        <svg className="tag-toolbar-icon" aria-hidden="true" viewBox="0 0 20 20">
+          <path d="M10.5 3.5h6v6l-7 7-6-6 7-7Z" />
+          <circle cx="13.3" cy="6.7" r="0.8" />
+        </svg>
+        Manage tags
+      </summary>
       <div className="tag-manager-panel">
+        <div className="tag-manager-heading">
+          <div className="tag-panel-title">
+            <svg className="tag-panel-icon" aria-hidden="true" viewBox="0 0 20 20">
+              <path d="M10.5 3.5h6v6l-7 7-6-6 7-7Z" />
+              <circle cx="13.3" cy="6.7" r="0.8" />
+            </svg>
+            <strong>Manage tags</strong>
+          </div>
+          <span className="tag-panel-count" aria-label={`${tags.length} tags`}>
+            {tags.length}
+          </span>
+        </div>
         <form className="tag-create-form" onSubmit={handleAddTag}>
           <label>
             <span>New tag</span>
@@ -111,8 +129,12 @@ export function TagManager({
             label="New tag color"
             onChange={setNewColor}
           />
-          <button type="submit" disabled={isSaving || !newName.trim()}>
-            Add
+          <button
+            className="tag-panel-primary"
+            type="submit"
+            disabled={isSaving || !newName.trim()}
+          >
+            + Add tag
           </button>
         </form>
 
@@ -123,17 +145,22 @@ export function TagManager({
         )}
         {isLoading && <p className="tag-manager-status">Loading tags...</p>}
 
-        <label className="tag-priority-toggle">
-          <input
-            type="checkbox"
-            checked={isPriorityEnabled}
-            disabled={isLoading || isSavingOrder}
-            onChange={(event) =>
-              void onPriorityEnabledChange(event.target.checked)
-            }
-          />
-          <span>Sort tags by priority</span>
-        </label>
+        <div className="tag-priority-setting">
+          <label className="tag-priority-toggle">
+            <input
+              type="checkbox"
+              checked={isPriorityEnabled}
+              disabled={isLoading || isSavingOrder}
+              onChange={(event) =>
+                void onPriorityEnabledChange(event.target.checked)
+              }
+            />
+            <span>Sort tasks by tag priority</span>
+          </label>
+          <p className="tag-priority-note">
+            Higher tags put tasks first within each date.
+          </p>
+        </div>
 
         {!isLoading && tags.length > 0 && (
           <div className="tag-manager-list">
@@ -155,13 +182,18 @@ export function TagManager({
                     onChange={setEditColor}
                   />
                   <button
+                    className="tag-panel-primary"
                     type="button"
                     disabled={isSaving || !editName.trim()}
                     onClick={() => void saveEditedTag(tag.id)}
                   >
                     Save
                   </button>
-                  <button type="button" onClick={() => setEditingTagId(null)}>
+                  <button
+                    className="tag-panel-cancel"
+                    type="button"
+                    onClick={() => setEditingTagId(null)}
+                  >
                     Cancel
                   </button>
                 </div>
@@ -177,7 +209,9 @@ export function TagManager({
                           disabled={isSavingOrder || tagIndex === 0}
                           onClick={() => void onMoveTag(tag.id, "up")}
                         >
-                          {"\u2191"}
+                          <svg className="task-action-icon" aria-hidden="true" viewBox="0 0 20 20">
+                            <path d="m5 9 5-5 5 5M10 4v12" />
+                          </svg>
                         </button>
                         <button
                           type="button"
@@ -188,14 +222,23 @@ export function TagManager({
                           }
                           onClick={() => void onMoveTag(tag.id, "down")}
                         >
-                          {"\u2193"}
+                          <svg className="task-action-icon" aria-hidden="true" viewBox="0 0 20 20">
+                            <path d="m5 11 5 5 5-5M10 16V4" />
+                          </svg>
                         </button>
                       </div>
                     )}
                     <TagPill tag={tag} />
                   </div>
-                  <div>
-                    <button type="button" onClick={() => beginEditing(tag)}>
+                  <div className="tag-manager-row-actions">
+                    <button
+                      type="button"
+                      onClick={() => beginEditing(tag)}
+                      aria-label={`Edit ${tag.name}`}
+                    >
+                      <svg className="task-action-icon" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="m12.5 4.5 3 3M4 16l1-4L13.5 3.5a2.1 2.1 0 0 1 3 3L8 15l-4 1Z" />
+                      </svg>
                       Edit
                     </button>
                     <button
@@ -203,7 +246,11 @@ export function TagManager({
                       type="button"
                       disabled={isSaving}
                       onClick={() => void confirmRemoveTag(tag)}
+                      aria-label={`Delete tag ${tag.name}`}
                     >
+                      <svg className="task-action-icon" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M3.5 5.5h13M7.5 5.5V3h5v2.5M5.5 5.5l.8 11h7.4l.8-11M8.5 8.5v5M11.5 8.5v5" />
+                      </svg>
                       Delete
                     </button>
                   </div>
@@ -211,6 +258,9 @@ export function TagManager({
               ),
             )}
           </div>
+        )}
+        {!isLoading && tags.length === 0 && (
+          <p className="tag-manager-status">No tags yet. Create your first one above.</p>
         )}
       </div>
     </details>
