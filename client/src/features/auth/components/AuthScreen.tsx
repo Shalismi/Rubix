@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router";
+import { getAccountPath, type AuthMode } from "../../../app/config/routes";
 import { AuthBrand } from "./AuthBrand";
 import type { LoginCredentials, RegistrationCredentials } from "../types";
 import {
@@ -6,9 +8,9 @@ import {
   PASSWORD_REQUIREMENTS,
 } from "../utils/password";
 
-type AuthMode = "login" | "register";
-
 type AuthScreenProps = {
+  mode: AuthMode;
+  returnPath: string;
   error: string | null;
   isSubmitting: boolean;
   onClearError: () => void;
@@ -17,29 +19,20 @@ type AuthScreenProps = {
 };
 
 export function AuthScreen({
+  mode,
+  returnPath,
   error,
   isSubmitting,
   onClearError,
   onLogin,
   onRegister,
 }: AuthScreenProps) {
-  const [mode, setMode] = useState<AuthMode>("login");
   const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const isRegistering = mode === "register";
-
-  function selectMode(nextMode: AuthMode) {
-    setMode(nextMode);
-    setIdentifier("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setFormError(null);
-    onClearError();
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -88,26 +81,22 @@ export function AuthScreen({
           </p>
         </div>
 
-        <div className="auth-tabs" role="tablist" aria-label="Account action">
-          <button
-            aria-selected={!isRegistering}
+        <nav className="auth-tabs" aria-label="Account action">
+          <Link
+            aria-current={!isRegistering ? "page" : undefined}
             className={!isRegistering ? "is-active" : ""}
-            onClick={() => selectMode("login")}
-            role="tab"
-            type="button"
+            to={getAccountPath("login", returnPath)}
           >
             Sign in
-          </button>
-          <button
-            aria-selected={isRegistering}
+          </Link>
+          <Link
+            aria-current={isRegistering ? "page" : undefined}
             className={isRegistering ? "is-active" : ""}
-            onClick={() => selectMode("register")}
-            role="tab"
-            type="button"
+            to={getAccountPath("register", returnPath)}
           >
             Create account
-          </button>
-        </div>
+          </Link>
+        </nav>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="auth-field">
@@ -148,7 +137,7 @@ export function AuthScreen({
             <div className="auth-field-label-row">
               <label htmlFor="auth-password">Password</label>
               {!isRegistering ? (
-                <a href="/forgot-password">Forgot password?</a>
+                <Link to={getAccountPath("forgot-password", returnPath)}>Forgot password?</Link>
               ) : null}
             </div>
             <input

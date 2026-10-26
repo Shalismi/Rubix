@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+import { APP_PATHS } from "../../../app/config/routes";
 import { TagPill } from "../../tags/components/TagPill";
 import { CalendarIcon } from "./CalendarIcon";
 import type { Task } from "../types";
@@ -15,7 +17,6 @@ type CalendarPanelProps = {
   selectedTaskId: number | null;
   tasks: Task[];
   onSelectTask: (taskId: number) => void;
-  onOpenCalendar: () => void;
 };
 
 type DatedTask = Task & {
@@ -41,7 +42,6 @@ export function CalendarPanel({
   selectedTaskId,
   tasks,
   onSelectTask,
-  onOpenCalendar,
 }: CalendarPanelProps) {
   const todayDateValue = getTodayDateValue();
   const upcomingTasks = tasks
@@ -80,16 +80,15 @@ export function CalendarPanel({
       <div className="calendar-header">
         <CalendarIcon />
         <h2 id="calendar-heading">Calendar</h2>
-        <button
+        <Link
           className="calendar-open-button"
-          type="button"
-          onClick={onOpenCalendar}
+          to={APP_PATHS.calendar}
         >
           View calendar
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 17 17 7M7 7h10v10" />
           </svg>
-        </button>
+        </Link>
       </div>
 
       {nextTask ? (

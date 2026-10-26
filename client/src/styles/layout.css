@@ -2,6 +2,17 @@
   width: 100%;
 }
 
+.route-not-found {
+  max-width: 40rem;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.route-not-found .secondary-button {
+  display: inline-flex;
+  text-decoration: none;
+}
+
 .app-shell {
   --page-gutter: clamp(1rem, 4vw, 2rem);
   --sidebar-width: 18.5rem;
@@ -41,6 +52,7 @@
   font: inherit;
   font-weight: 750;
   text-align: left;
+  text-decoration: none;
 }
 
 .sidebar-nav-icon {

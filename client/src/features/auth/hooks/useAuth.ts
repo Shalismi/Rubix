@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getWelcomeMessage, startWelcomeSession } from "../../../app/config/welcome";
 import {
   getCurrentUser,
@@ -24,6 +24,7 @@ export function useAuth() {
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const clearAuthError = useCallback(() => setAuthError(null), []);
   const [registrationRecoveryCode, setRegistrationRecoveryCode] = useState<
     string | null
   >(null);
@@ -109,7 +110,7 @@ export function useAuth() {
     registrationRecoveryCode,
     user,
     welcomeMessage,
-    clearAuthError: () => setAuthError(null),
+    clearAuthError,
     dismissRegistrationRecoveryCode: () =>
       setRegistrationRecoveryCode(null),
     login,

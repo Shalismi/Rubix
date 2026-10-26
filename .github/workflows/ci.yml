@@ -47,6 +47,14 @@ jobs:
         env:
           VITE_API_URL: http://localhost:5000
 
+      - name: Install browser for navigation checks
+        run: npx playwright install --with-deps chromium
+        working-directory: client
+
+      - name: Check browser navigation
+        run: npm run test:e2e
+        working-directory: client
+
   server:
     name: Server checks
     runs-on: ubuntu-latest

@@ -27,13 +27,17 @@ Stores the product screenshots displayed in the GitHub README.
 ## Client
 
 `client/src/App.tsx`
-Connects the main app layout together.
+Connects the main app layout and page routes, with session checks and account
+redirects. Shared task, tag, and streak state stays mounted between app pages.
+
+`client/src/main.tsx`
+Starts React inside the browser router.
 
 `client/src/app`
 App-level pieces that are not specific to one feature.
 
 - `components`: the sidebar and top account/header area.
-- `config`: font choices and rotating welcome messages.
+- `config`: page paths, safe account return links, font choices, and rotating welcome messages.
 - `hooks`: saved font preferences for each account.
 
 `client/src/config`
@@ -80,7 +84,11 @@ Locally served font files and their licenses.
 Images used by the app, including the Rubix cube logo.
 
 `client/tests`
-Task-priority regression tests run locally and by CI.
+Task-priority and account-return-link regression tests run locally and by CI.
+
+`client/e2e` and `client/playwright.config.ts`
+Browser navigation, refresh, direct-link, and account-route checks using a local
+production preview with mocked API responses.
 
 ## Server
 

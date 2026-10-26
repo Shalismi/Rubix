@@ -238,12 +238,6 @@ export function useTasks({ onTaskCompleted }: UseTasksOptions = {}) {
     }
 
     setSelectedTaskId(taskId);
-
-    window.requestAnimationFrame(() => {
-      document
-        .getElementById(`task-${taskId}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
   }
 
   async function toggleTaskCompleted(taskId: number) {

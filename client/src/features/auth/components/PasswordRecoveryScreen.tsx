@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from "react";
+import { Link, useLocation } from "react-router";
+import { getAccountPath, getReturnPath } from "../../../app/config/routes";
 import { recoverPassword } from "../api/authApi";
 import {
   getPasswordPolicyError,
@@ -14,6 +16,8 @@ function getErrorMessage(error: unknown) {
 }
 
 export function PasswordRecoveryScreen() {
+  const location = useLocation();
+  const signInPath = getAccountPath("login", getReturnPath(location.search));
   const [identifier, setIdentifier] = useState("");
   const [recoveryCode, setRecoveryCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -69,9 +73,10 @@ export function PasswordRecoveryScreen() {
 
             <RecoveryCodeDisplay code={replacementCode} />
 
-            <a className="primary-button auth-submit auth-link-button" href="/">
+            {/* Recovery revokes sessions; re-check the cookie on return. */}
+            <Link className="primary-button auth-submit auth-link-button" reloadDocument to={signInPath}>
               Back to sign in
-            </a>
+            </Link>
           </>
         ) : (
           <>
@@ -156,9 +161,9 @@ export function PasswordRecoveryScreen() {
                 {isSubmitting ? "Resetting password..." : "Reset password"}
               </button>
 
-              <a className="auth-back-link" href="/">
+              <Link className="auth-back-link" to={signInPath}>
                 Back to sign in
-              </a>
+              </Link>
             </form>
           </>
         )}

@@ -48,6 +48,8 @@ server-backed sessions, automated tests, Docker, and continuous integration.
 
 ### Delivery and quality
 
+- Navigate between sections with browser Back/Forward, bookmark a page, and
+  refresh while staying in the same section.
 - Persist application data in PostgreSQL through Prisma.
 - Run the frontend and API from one Render web service in production.
 - Reproduce the production build locally with Docker Compose.
@@ -92,11 +94,11 @@ database.
 
 | Area | Tools |
 | --- | --- |
-| Client | React 19, TypeScript, Vite, CSS |
+| Client | React 19, React Router, TypeScript, Vite, CSS |
 | Server | Node.js 24, Express 5, TypeScript |
 | Database | PostgreSQL 18, Prisma ORM |
 | Authentication | Argon2 password hashing, database sessions, HTTP-only cookies |
-| Testing | Node test runner, integration tests, ESLint, TypeScript |
+| Testing | Node test runner, Playwright, integration tests, ESLint, TypeScript |
 | Infrastructure | Docker, Docker Compose, GitHub Actions |
 | Hosting | Render web service, Supabase PostgreSQL |
 
@@ -215,7 +217,10 @@ Run the same main checks locally:
 
 ```powershell
 npm.cmd run lint --prefix client
+npm.cmd test --prefix client
 npm.cmd run build --prefix client
+npm.cmd exec --prefix client -- playwright install chromium
+npm.cmd run test:e2e --prefix client
 npm.cmd test --prefix server
 docker compose config --quiet
 docker build --target runtime --tag rubix:check .
@@ -225,10 +230,15 @@ The server integration suite creates a separate `rubix_test` database, tests
 authentication and user-owned task flows, and removes that database afterward.
 It does not change development data.
 
+The client browser suite starts a local preview of the production build and
+mocks the account and task API. It checks page URLs, Back/Forward, refresh,
+sign-in redirects, registration, sign-out, and calendar navigation without
+accessing real account data.
+
 GitHub Actions runs three independent jobs for pushes and pull requests:
 
-1. **Client checks:** installs dependencies, lints, and creates a production
-   build.
+1. **Client checks:** installs dependencies, lints, runs unit tests, creates a
+   production build, and checks browser navigation with Playwright.
 2. **Server checks:** starts temporary PostgreSQL, generates Prisma, runs the
    integration suite, and builds the API.
 3. **Docker checks:** validates `compose.yaml` and builds the production image.

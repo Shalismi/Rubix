@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { verifyEmail } from "../api/authApi";
 import { AuthBrand } from "./AuthBrand";
 
 type VerificationStatus = "checking" | "error" | "success";
 
 export function EmailVerificationScreen() {
-  const token = new URLSearchParams(window.location.search).get("token");
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const [status, setStatus] = useState<VerificationStatus>(
     token ? "checking" : "error",
   );
@@ -64,9 +66,10 @@ export function EmailVerificationScreen() {
         </div>
 
         {status !== "checking" ? (
-          <a className="primary-button verification-action" href="/">
+          // Reload to refresh the signed-in account's email verification status.
+          <Link className="primary-button verification-action" reloadDocument to="/">
             Continue to Rubix
-          </a>
+          </Link>
         ) : null}
       </section>
     </main>

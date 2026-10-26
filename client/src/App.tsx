@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import "./styles/fonts.css";
 import "./styles/layout.css";
 import "./styles/buttons.css";
@@ -12,8 +13,9 @@ import "./styles/tags.css";
 import "./styles/trash.css";
 import "./styles/theme.css";
 import { AppHeader } from "./app/components/AppHeader";
-import { AppSidebar, type AppView } from "./app/components/AppSidebar";
+import { AppSidebar } from "./app/components/AppSidebar";
 import { FONT_OPTIONS } from "./app/config/fonts";
+import { APP_PATHS, getAccountPath, getPageTitle, getReturnPath, type AuthMode } from "./app/config/routes";
 import { useFont } from "./app/hooks/useFont";
 import {
   AuthLoadingScreen,
@@ -52,7 +54,8 @@ function AuthenticatedApp({
   welcomeMessage,
 }: AuthenticatedAppProps) {
   const { font, setFont } = useFont(user.id);
-  const [activeView, setActiveView] = useState<AppView>("dashboard");
+  const location = useLocation();
+  const navigate = useNavigate();
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const streak = useStreak();
   const tasks = useTasks({ onTaskCompleted: streak.refreshStreak });
@@ -68,7 +71,6 @@ function AuthenticatedApp({
     tags.isPriorityEnabled,
   );
   const allTasks = [...activeTasks, ...completedTasks];
-  let activeContent;
 
   async function handleEditTag(tagId: number, input: TagInput) {
     const updatedTag = await tags.editTag(tagId, input);
@@ -93,80 +95,77 @@ function AuthenticatedApp({
     return wasRemoved;
   }
 
-  if (activeView === "dashboard") {
-    activeContent = (
-      <TaskDashboard
-        userId={user.id}
-        username={user.username}
-        welcomeMessage={welcomeMessage}
-        activeTasks={activeTasks}
-        completedTasks={completedTasks}
-        editingTaskId={tasks.editingTaskId}
-        isAddingTask={tasks.isAddingTask}
-        isLoadingTasks={tasks.isLoadingTasks}
-        selectedTaskId={tasks.selectedTaskId}
-        streak={streak.streak}
-        streakError={streak.streakError}
-        isLoadingStreak={streak.isLoadingStreak}
-        taskError={tasks.taskError}
+  const dashboard = (
+    <TaskDashboard
+      userId={user.id}
+      username={user.username}
+      welcomeMessage={welcomeMessage}
+      activeTasks={activeTasks}
+      completedTasks={completedTasks}
+      editingTaskId={tasks.editingTaskId}
+      isAddingTask={tasks.isAddingTask}
+      isLoadingTasks={tasks.isLoadingTasks}
+      selectedTaskId={tasks.selectedTaskId}
+      streak={streak.streak}
+      streakError={streak.streakError}
+      isLoadingStreak={streak.isLoadingStreak}
+      taskError={tasks.taskError}
+      tags={tags.tags}
+      selectedTagIds={selectedTagIds}
+      isLoadingTags={tags.isLoadingTags}
+      isTagPriorityEnabled={tags.isPriorityEnabled}
+      isSavingTagOrder={tags.isSavingTagOrder}
+      tagError={tags.tagError}
+      onAddTask={tasks.addTask}
+      onCancelAddTask={tasks.cancelAddTask}
+      onCancelEditTask={tasks.cancelEditingTask}
+      onDeleteTask={tasks.deleteTask}
+      onSelectTask={tasks.selectTask}
+      onStartEditTask={tasks.startEditingTask}
+      onToggleAddTask={tasks.toggleAddTask}
+      onToggleTaskCompleted={tasks.toggleTaskCompleted}
+      onUpdateTask={tasks.updateTask}
+      onSelectedTagIdsChange={setSelectedTagIds}
+      onAddTag={tags.addTag}
+      onEditTag={handleEditTag}
+      onMoveTag={tags.moveTag}
+      onTagPriorityEnabledChange={tags.changePriorityEnabled}
+      onRemoveTag={handleRemoveTag}
+    />
+  );
+  const calendar = (
+    <TaskCalendarView
+      selectedTaskId={tasks.selectedTaskId}
+      tasks={allTasks}
+      tags={tags.tags}
+      selectedTagIds={selectedTagIds}
+      onSelectTask={(taskId) => {
+        tasks.selectTask(taskId);
+        void navigate(APP_PATHS.dashboard);
+      }}
+      onSelectedTagIdsChange={setSelectedTagIds}
+    />
+  );
+  const trash = (
+    <div className="trash-layout">
+      <TrashView
+        tasks={tasks.trashedTasks}
         tags={tags.tags}
-        selectedTagIds={selectedTagIds}
-        isLoadingTags={tags.isLoadingTags}
-        isTagPriorityEnabled={tags.isPriorityEnabled}
-        isSavingTagOrder={tags.isSavingTagOrder}
-        tagError={tags.tagError}
-        onAddTask={tasks.addTask}
-        onCancelAddTask={tasks.cancelAddTask}
-        onCancelEditTask={tasks.cancelEditingTask}
-        onDeleteTask={tasks.deleteTask}
-        onSelectTask={tasks.selectTask}
-        onOpenCalendar={() => setActiveView("calendar")}
-        onStartEditTask={tasks.startEditingTask}
-        onToggleAddTask={tasks.toggleAddTask}
-        onToggleTaskCompleted={tasks.toggleTaskCompleted}
-        onUpdateTask={tasks.updateTask}
-        onSelectedTagIdsChange={setSelectedTagIds}
-        onAddTag={tags.addTag}
-        onEditTag={handleEditTag}
-        onMoveTag={tags.moveTag}
-        onTagPriorityEnabledChange={tags.changePriorityEnabled}
-        onRemoveTag={handleRemoveTag}
+        isLoading={tasks.isLoadingTrash}
+        error={tasks.trashError}
+        onRestore={tasks.restoreTask}
+        onPermanentlyDelete={tasks.permanentlyDeleteTask}
       />
-    );
-  } else if (activeView === "calendar") {
-    activeContent = (
-      <TaskCalendarView
-        selectedTaskId={tasks.selectedTaskId}
-        tasks={allTasks}
-        tags={tags.tags}
-        selectedTagIds={selectedTagIds}
-        onSelectTask={tasks.selectTask}
-        onSelectedTagIdsChange={setSelectedTagIds}
-      />
-    );
-  } else if (activeView === "trash") {
-    activeContent = (
-      <div className="trash-layout">
-        <TrashView
-          tasks={tasks.trashedTasks}
-          tags={tags.tags}
-          isLoading={tasks.isLoadingTrash}
-          error={tasks.trashError}
-          onRestore={tasks.restoreTask}
-          onPermanentlyDelete={tasks.permanentlyDeleteTask}
-        />
-      </div>
-    );
-  } else {
-    activeContent = (
-      <AccountSettings
-        user={user}
-        onUserChange={onUserChange}
-        font={font}
-        onFontChange={setFont}
-      />
-    );
-  }
+    </div>
+  );
+  const settings = (
+    <AccountSettings
+      user={user}
+      onUserChange={onUserChange}
+      font={font}
+      onFontChange={setFont}
+    />
+  );
 
   return (
     <div
@@ -174,9 +173,9 @@ function AuthenticatedApp({
       data-font={font}
       style={{ fontFamily: FONT_OPTIONS[font].family }}
     >
-      <AppSidebar activeView={activeView} onSelectView={setActiveView} />
+      <AppSidebar />
 
-      <div className={`app-main${activeView === "calendar" ? " app-main-calendar" : ""}`}>
+      <div className={`app-main${location.pathname.replace(/\/+$/, "") === APP_PATHS.calendar ? " app-main-calendar" : ""}`}>
         <AppHeader
           authError={authError}
           isSigningOut={isSigningOut}
@@ -184,7 +183,21 @@ function AuthenticatedApp({
           username={user.username}
         />
 
-        {activeContent}
+        <Routes>
+          <Route path={APP_PATHS.dashboard} element={dashboard} />
+          <Route path={APP_PATHS.calendar} element={calendar} />
+          <Route path={APP_PATHS.trash} element={trash} />
+          <Route path={APP_PATHS.settings} element={settings} />
+          <Route path="*" element={
+            <main className="route-not-found">
+              <h1>Page not found</h1>
+              <p>This address doesn’t match a Rubix page.</p>
+              <Link className="secondary-button" to={APP_PATHS.dashboard}>
+                Go to dashboard
+              </Link>
+            </main>
+          } />
+        </Routes>
       </div>
     </div>
   );
@@ -192,25 +205,28 @@ function AuthenticatedApp({
 
 function App() {
   const auth = useAuth();
-  const isVerifyingEmail = window.location.pathname === "/verify-email";
-  const isRecoveringPassword =
-    window.location.pathname === "/forgot-password";
+  const location = useLocation();
+  const returnPath = getReturnPath(location.search);
+  const { clearAuthError } = auth;
 
-  if (isVerifyingEmail) {
-    return <EmailVerificationScreen />;
-  }
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname);
+    clearAuthError();
+    window.scrollTo(0, 0);
+  }, [location.pathname, clearAuthError]);
 
-  if (isRecoveringPassword) {
-    return <PasswordRecoveryScreen />;
-  }
+  function accountPage(mode: AuthMode) {
+    if (auth.isCheckingSession) return <AuthLoadingScreen />;
+    if (auth.registrationRecoveryCode) {
+      return <Navigate replace to={getAccountPath("recovery-code", returnPath)} />;
+    }
+    if (auth.user) return <Navigate replace to={returnPath} />;
 
-  if (auth.isCheckingSession) {
-    return <AuthLoadingScreen />;
-  }
-
-  if (!auth.user) {
     return (
       <AuthScreen
+        key={mode}
+        mode={mode}
+        returnPath={returnPath}
         error={auth.authError}
         isSubmitting={auth.isSubmitting}
         onClearError={auth.clearAuthError}
@@ -220,7 +236,11 @@ function App() {
     );
   }
 
-  if (auth.registrationRecoveryCode) {
+  function recoveryPage() {
+    if (auth.isCheckingSession) return <AuthLoadingScreen />;
+    if (!auth.user) return <Navigate replace to={getAccountPath("login", returnPath)} />;
+    if (!auth.registrationRecoveryCode) return <Navigate replace to={returnPath} />;
+
     return (
       <RecoveryCodeScreen
         code={auth.registrationRecoveryCode}
@@ -229,16 +249,40 @@ function App() {
     );
   }
 
+  function protectedPages() {
+    if (auth.isCheckingSession) return <AuthLoadingScreen />;
+    const destination = location.pathname + location.search + location.hash;
+    if (!auth.user) return <Navigate replace to={getAccountPath("login", destination)} />;
+    if (auth.registrationRecoveryCode) {
+      return <Navigate replace to={getAccountPath("recovery-code", destination)} />;
+    }
+
+    return (
+      <AuthenticatedApp
+        key={auth.user.id}
+        authError={auth.authError}
+        isSigningOut={auth.isSubmitting}
+        onSignOut={auth.logout}
+        onUserChange={auth.updateUser}
+        user={auth.user}
+        welcomeMessage={auth.welcomeMessage}
+      />
+    );
+  }
+
+  if (location.pathname.length > 1 && location.pathname.endsWith("/")) {
+    return <Navigate replace to={location.pathname.replace(/\/+$/, "") + location.search + location.hash} />;
+  }
+
   return (
-    <AuthenticatedApp
-      key={auth.user.id}
-      authError={auth.authError}
-      isSigningOut={auth.isSubmitting}
-      onSignOut={auth.logout}
-      onUserChange={auth.updateUser}
-      user={auth.user}
-      welcomeMessage={auth.welcomeMessage}
-    />
+    <Routes>
+      <Route path="/login" element={accountPage("login")} />
+      <Route path="/register" element={accountPage("register")} />
+      <Route path="/forgot-password" element={<PasswordRecoveryScreen />} />
+      <Route path="/verify-email" element={<EmailVerificationScreen key={location.search} />} />
+      <Route path="/recovery-code" element={recoveryPage()} />
+      <Route path="/*" element={protectedPages()} />
+    </Routes>
   );
 }
 

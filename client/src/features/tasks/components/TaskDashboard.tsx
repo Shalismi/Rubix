@@ -81,7 +81,6 @@ type TaskDashboardProps = {
   onCancelEditTask: () => void;
   onDeleteTask: (taskId: number) => void;
   onSelectTask: (taskId: number) => void;
-  onOpenCalendar: () => void;
   onStartEditTask: (taskId: number) => void;
   onToggleAddTask: () => void;
   onToggleTaskCompleted: (taskId: number) => void;
@@ -119,7 +118,6 @@ export function TaskDashboard({
   onCancelEditTask,
   onDeleteTask,
   onSelectTask,
-  onOpenCalendar,
   onStartEditTask,
   onToggleAddTask,
   onToggleTaskCompleted,
@@ -166,6 +164,16 @@ export function TaskDashboard({
     : activeTaskGroups;
   const hasSearchResults =
     filteredActiveTasks.length + filteredCompletedTasks.length > 0;
+
+  useEffect(() => {
+    if (selectedTaskId === null) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`task-${selectedTaskId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedTaskId]);
 
   useEffect(() => {
     try {
@@ -337,7 +345,6 @@ export function TaskDashboard({
             selectedTaskId={selectedTaskId}
             tasks={filteredActiveTasks}
             onSelectTask={onSelectTask}
-            onOpenCalendar={onOpenCalendar}
           />
         </div>
       </div>

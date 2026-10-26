@@ -5,6 +5,8 @@
 **/.env.*
 **/node_modules
 **/dist
+**/test-results
+**/playwright-report
 **/*.log
 coverage
 npm-debug.log*

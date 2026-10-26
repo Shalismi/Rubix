@@ -1,6 +1,6 @@
+import { NavLink } from "react-router";
 import rubixCubeLogo from "../../assets/rubix-cube.png";
-
-export type AppView = "dashboard" | "calendar" | "trash" | "settings";
+import { APP_PATHS, type AppView } from "../config/routes";
 
 type NavItem = {
   view: AppView;
@@ -53,37 +53,25 @@ function SidebarIcon({ icon }: { icon: NavItem["icon"] }) {
 }
 
 function SidebarNavItem({
-  activeView,
   item,
-  onSelectView,
 }: {
-  activeView: AppView;
   item: NavItem;
-  onSelectView: (view: AppView) => void;
 }) {
-  const isActive = item.view === activeView;
-
   return (
-    <button
-      className={`sidebar-nav-item${isActive ? " is-active" : ""}`}
-      type="button"
-      aria-current={isActive ? "page" : undefined}
-      onClick={() => onSelectView(item.view)}
+    <NavLink
+      className={({ isActive }) => `sidebar-nav-item${isActive ? " is-active" : ""}`}
+      end
+      to={APP_PATHS[item.view]}
     >
       <span className="sidebar-nav-icon">
         <SidebarIcon icon={item.icon} />
       </span>
       <span>{item.label}</span>
-    </button>
+    </NavLink>
   );
 }
 
-type AppSidebarProps = {
-  activeView: AppView;
-  onSelectView: (view: AppView) => void;
-};
-
-export function AppSidebar({ activeView, onSelectView }: AppSidebarProps) {
+export function AppSidebar() {
   return (
     <aside className="app-sidebar" aria-label="Rubix navigation">
       <div className="sidebar-brand">
@@ -99,12 +87,7 @@ export function AppSidebar({ activeView, onSelectView }: AppSidebarProps) {
 
       <nav className="sidebar-nav" aria-label="Primary navigation">
         {primaryNavItems.map((item) => (
-          <SidebarNavItem
-            activeView={activeView}
-            item={item}
-            key={item.label}
-            onSelectView={onSelectView}
-          />
+          <SidebarNavItem item={item} key={item.label} />
         ))}
       </nav>
     </aside>

@@ -29,6 +29,7 @@
   font: inherit;
   font-size: calc(0.72rem * var(--text-scale));
   font-weight: 700;
+  text-decoration: none;
 }
 
 .calendar-open-button svg,
