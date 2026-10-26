@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { verifyEmail } from "../api/authApi";
+import { AuthBrand } from "./AuthBrand";
 
 type VerificationStatus = "checking" | "error" | "success";
 
@@ -43,10 +44,7 @@ export function EmailVerificationScreen() {
   return (
     <main className="auth-shell">
       <section className="auth-panel verification-panel" aria-live="polite">
-        <div className="auth-brand">
-          <span className="sidebar-logo-mark" aria-hidden="true" />
-          <span>Rubix</span>
-        </div>
+        <AuthBrand />
 
         <div className="verification-result">
           <span

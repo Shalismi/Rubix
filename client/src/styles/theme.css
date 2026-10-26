@@ -1,9 +1,13 @@
-body:has(.app-shell) {
+body:has(.app-shell, .auth-shell) {
   min-width: 0;
 }
 
 .app-shell {
   --right-column-width: 26rem;
+}
+
+.app-shell,
+.auth-shell {
   --appearance-ink: #182254;
   --appearance-muted: #6173a9;
   --appearance-border: rgb(255 255 255 / 95%);
@@ -176,7 +180,8 @@ body:has(.app-shell) {
 .app-shell .task-primary-button,
 .app-shell .task-cancel-button,
 .app-shell .tag-manager-panel .tag-panel-primary,
-.app-shell .tag-manager-panel .tag-panel-cancel {
+.app-shell .tag-manager-panel .tag-panel-cancel,
+.auth-shell .primary-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -200,7 +205,8 @@ body:has(.app-shell) {
 }
 
 .app-shell .task-primary-button,
-.app-shell .tag-manager-panel .tag-panel-primary {
+.app-shell .tag-manager-panel .tag-panel-primary,
+.auth-shell .primary-button {
   --task-button-edge: 57 49 184;
 
   background:
@@ -222,7 +228,8 @@ body:has(.app-shell) {
 .app-shell .task-primary-button:hover:not(:disabled),
 .app-shell .task-cancel-button:hover:not(:disabled),
 .app-shell .tag-manager-panel .tag-panel-primary:hover:not(:disabled),
-.app-shell .tag-manager-panel .tag-panel-cancel:hover:not(:disabled) {
+.app-shell .tag-manager-panel .tag-panel-cancel:hover:not(:disabled),
+.auth-shell .primary-button:hover:not(:disabled) {
   filter: brightness(1.025);
   transform: translateY(-1px);
 }
@@ -230,7 +237,8 @@ body:has(.app-shell) {
 .app-shell .task-primary-button:active:not(:disabled),
 .app-shell .task-cancel-button:active:not(:disabled),
 .app-shell .tag-manager-panel .tag-panel-primary:active:not(:disabled),
-.app-shell .tag-manager-panel .tag-panel-cancel:active:not(:disabled) {
+.app-shell .tag-manager-panel .tag-panel-cancel:active:not(:disabled),
+.auth-shell .primary-button:active:not(:disabled) {
   box-shadow:
     inset 0 1px 3px rgb(var(--task-button-edge) / 20%),
     inset 0 1px 0 rgb(255 255 255 / 35%),
@@ -243,7 +251,8 @@ body:has(.app-shell) {
 .app-shell .task-primary-button:focus-visible,
 .app-shell .task-cancel-button:focus-visible,
 .app-shell .tag-manager-panel .tag-panel-primary:focus-visible,
-.app-shell .tag-manager-panel .tag-panel-cancel:focus-visible {
+.app-shell .tag-manager-panel .tag-panel-cancel:focus-visible,
+.auth-shell .primary-button:focus-visible {
   outline: 3px solid rgb(var(--task-button-edge) / 55%);
   outline-offset: 4px;
 }
@@ -251,7 +260,8 @@ body:has(.app-shell) {
 .app-shell .task-primary-button:disabled,
 .app-shell .task-cancel-button:disabled,
 .app-shell .tag-manager-panel .tag-panel-primary:disabled,
-.app-shell .tag-manager-panel .tag-panel-cancel:disabled {
+.app-shell .tag-manager-panel .tag-panel-cancel:disabled,
+.auth-shell .primary-button:disabled {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 50%), 0 3px 12px -5px rgb(38 46 77 / 12%);
   cursor: not-allowed;
   filter: saturate(0.6);
@@ -1973,6 +1983,7 @@ body:has(.app-shell) {
   .app-shell .task-cancel-button,
   .app-shell .tag-panel-primary,
   .app-shell .tag-panel-cancel,
+  .auth-shell .primary-button,
   .app-shell .tag-filter > summary,
   .app-shell .tag-manager > summary {
     transition: none;

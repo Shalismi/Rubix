@@ -1,4 +1,5 @@
 import { RecoveryCodeDisplay } from "./RecoveryCodeDisplay";
+import { AuthBrand } from "./AuthBrand";
 
 type RecoveryCodeScreenProps = {
   code: string;
@@ -12,10 +13,7 @@ export function RecoveryCodeScreen({
   return (
     <main className="auth-shell">
       <section className="auth-panel recovery-panel" aria-labelledby="recovery-title">
-        <div className="auth-brand">
-          <span className="sidebar-logo-mark" aria-hidden="true" />
-          <span>Rubix</span>
-        </div>
+        <AuthBrand />
 
         <div className="auth-heading">
           <h1 id="recovery-title">Save your recovery code</h1>

@@ -28,16 +28,6 @@
   font-weight: 800;
 }
 
-.sidebar-logo-mark {
-  width: 2.45rem;
-  height: 2.45rem;
-  border-radius: 10px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 45%),
-    conic-gradient(from 135deg, #2563eb, #38bdf8, #a855f7, #fb7185, #f97316, #2563eb);
-  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.22);
-}
-
 .sidebar-nav {
   display: grid;
   margin-top: 2rem;

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { AuthBrand } from "./AuthBrand";
 import type { LoginCredentials, RegistrationCredentials } from "../types";
 import {
   getPasswordPolicyError,
@@ -74,10 +75,7 @@ export function AuthScreen({
   return (
     <main className="auth-shell">
       <section className="auth-panel" aria-labelledby="auth-title">
-        <div className="auth-brand">
-          <span className="sidebar-logo-mark" aria-hidden="true" />
-          <span>Rubix</span>
-        </div>
+        <AuthBrand />
 
         <div className="auth-heading">
           <h1 id="auth-title">
@@ -211,9 +209,8 @@ export function AuthLoadingScreen() {
   return (
     <main className="auth-shell">
       <div className="auth-loading" role="status">
-        <span className="sidebar-logo-mark" aria-hidden="true" />
-        <strong>Rubix</strong>
-        <span>Checking your session...</span>
+        <AuthBrand />
+        <p>Checking your session...</p>
       </div>
     </main>
   );
