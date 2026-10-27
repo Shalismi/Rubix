@@ -44,6 +44,30 @@
   margin-top: 2rem;
 }
 
+.sidebar-credit {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 2rem 0.75rem 0.25rem;
+  color: var(--appearance-muted);
+  font-size: calc(0.72rem * var(--text-scale));
+}
+
+.sidebar-credit a {
+  color: var(--appearance-ink);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.sidebar-credit a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sidebar-credit a:focus-visible {
+  outline: 2px solid #8297d9;
+  outline-offset: 3px;
+}
+
 .sidebar-nav-item {
   display: grid;
   align-items: center;
@@ -273,6 +297,11 @@
 }
 
 @media (max-width: 900px) {
+  .sidebar-credit {
+    padding: 0.75rem 0.25rem 0;
+    text-align: right;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
   }

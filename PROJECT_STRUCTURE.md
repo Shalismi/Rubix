@@ -24,6 +24,10 @@ Runs the client, server, and Docker checks for pushes and pull requests.
 `docs/screenshots`
 Stores the product screenshots displayed in the GitHub README.
 
+`docs/DEVELOPMENT.md`
+Setup, environment variables, test commands, deployment settings, and account
+security details.
+
 ## Client
 
 `client/src/App.tsx`

@@ -90,6 +90,13 @@ export function AppSidebar() {
           <SidebarNavItem item={item} key={item.label} />
         ))}
       </nav>
+
+      <footer className="sidebar-credit">
+        Made by{" "}
+        <a href="https://github.com/Shalismi" target="_blank" rel="noreferrer">
+          Shalismi
+        </a>
+      </footer>
     </aside>
   );
 }
